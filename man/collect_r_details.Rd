@@ -9,7 +9,7 @@ collect_r_details(.envs = NULL, .pkgs = NULL)
 \arguments{
 \item{.envs}{environment variables to retain}
 
-\item{.pkgs}{packages to load in new session}
+\item{.pkgs}{packages to load in new session, if null defaults to all loaded in current session}
 }
 \description{
 Information about running R
