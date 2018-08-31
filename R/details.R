@@ -8,13 +8,13 @@
 collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
   rpath <- file.path(R.home("bin"), "R")
   envs <- Sys.getenv()
-  renvs <- envs[grepl(pattern = "R_.*", names(envs))]
+  renvs <- as.list(envs[grepl(pattern = "^R_.*", names(envs))])
   if (!is.null(.envs)) {
     renvs <- unique(c(renvs, envs[which(names(envs) %in% .envs)]))
   }
-  if (!is.null(.pkgs)) {
+  loaded_pkgs <- if (!is.null(.pkgs)) {
     session <- sessionInfo()
-    loaded_pkgs <- names(session$otherPkgs)
+    names(session$otherPkgs)
   }
   list(
     rpath = rpath,
@@ -23,3 +23,4 @@ collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
     cwd = getwd()
   )
 }
+
