@@ -7,7 +7,7 @@ output: github_document
 JSON can be used as an interchange format
 
 ```{r}
-library(collectr)
-jsonlite::toJSON(collect_r_details(), auto_unbox = TRUE, pretty =TRUE)
+library(rrsq)
+jsonlite::toJSON(unbox_details(collect_r_details()), pretty =TRUE)
 ```
 

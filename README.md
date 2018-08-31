@@ -4,8 +4,8 @@
 JSON can be used as an interchange format
 
 ``` r
-library(collectr)
-jsonlite::toJSON(collect_r_details(), auto_unbox = TRUE, pretty =TRUE)
+library(rrsq)
+jsonlite::toJSON(unbox_details(collect_r_details()), pretty =TRUE)
 ```
 
     ## {
@@ -29,13 +29,13 @@ jsonlite::toJSON(collect_r_details(), auto_unbox = TRUE, pretty =TRUE)
     ##     "R_PRINTCMD": "lpr",
     ##     "R_QPDF": "/Library/Frameworks/R.framework/Resources/bin/qpdf",
     ##     "R_RD4PDF": "times,inconsolata,hyper",
-    ##     "R_SESSION_TMPDIR": "/var/folders/bk/qx8bnfbx739_g83s00t_85th0000gn/T//RtmptHIE9f",
+    ##     "R_SESSION_TMPDIR": "/var/folders/bk/qx8bnfbx739_g83s00t_85th0000gn/T//Rtmprz7HQ3",
     ##     "R_SHARE_DIR": "/Library/Frameworks/R.framework/Resources/share",
     ##     "R_SYSTEM_ABI": "osx,gcc,gxx,gfortran,?",
     ##     "R_TEXI2DVICMD": "/usr/local/bin/texi2dvi",
     ##     "R_UNZIPCMD": "/usr/bin/unzip",
     ##     "R_ZIPCMD": "/usr/bin/zip"
     ##   },
-    ##   "loaded_pkgs": {},
+    ##   "loaded_pkgs": ["rrsq"],
     ##   "cwd": "/Users/devin/Repos/collectr"
     ## }
