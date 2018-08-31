@@ -1,0 +1,13 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+JSON can be used as an interchange format
+
+```{r}
+library(collectr)
+jsonlite::toJSON(collect_r_details(), auto_unbox = TRUE, pretty =TRUE)
+```
+
