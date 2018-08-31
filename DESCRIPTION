@@ -1,8 +1,8 @@
-Package: collectr
+Package: rrsq
 Type: Package
-Title: Collect Info
+Title: R interface to r simple queue (rsq)
 Version: 0.0.1
-Description: Collect Info about your session.
+Description: An R interface to r simple queue (rsq).
 Encoding: UTF-8
 LazyData: true
 Authors@R: 
@@ -11,3 +11,5 @@ Authors@R:
            role = c("aut", "cre"),
            email = "devin.pastoor@gmail.com")
 RoxygenNote: 6.1.0
+Imports: 
+    magrittr
