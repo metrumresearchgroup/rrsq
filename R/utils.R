@@ -18,3 +18,22 @@
     x
   }
 }
+
+
+safe_get <- purrr::safely(httr::GET)
+
+parse_response <- function(resp) {
+  if (!is.null(resp)) {
+    return(jsonlite::fromJSON(rawToChar(resp$content), simplifyDataFrame = F))
+  }
+  return(NULL)
+}
+
+#' calculate the time difference
+#' @param start_time the start time
+#' @param end_time the end time
+#' @param units units to calculate, defaults to secs
+#' @export
+time_difference <- function(end_time, start_time, units = "secs") {
+  as.numeric(difftime(end_time, start_time, units = units))
+}
