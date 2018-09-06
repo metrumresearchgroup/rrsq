@@ -28,18 +28,18 @@
     r_details$renv <- renv
   }
   submission_values <- list(
-      "ID"= 0,
-      "Status"= "QUEUED",
-      "User"= user,
-      "Context"= context,
+      "ID"= jsonlite::unbox(0),
+      "Status"= jsonlite::unbox("QUEUED"),
+      "User"= jsonlite::unbox(user),
+      "Context"= jsonlite::unbox(context),
       "Rscript"= list(
         "r_path"= r_details$r_path,
         "work_dir"= r_details$work_dir,
-        "rscript_path"= rscript_path,
+        "rscript_path"= jsonlite::unbox(rscript_path),
         "renv"= r_details$renv
       )
   )
-  submission_json <- jsonlite::toJSON(submission_values, auto_unbox = T)
+  submission_json <- jsonlite::toJSON(submission_values)
   if (.no_submit) {
     return(submission_json)
   }
