@@ -12,4 +12,12 @@ Authors@R:
            email = "devin.pastoor@gmail.com")
 RoxygenNote: 6.1.0
 Imports: 
-    magrittr
+    R6,
+    purrr,
+    dplyr,
+    magrittr,
+    httr,
+    jsonlite,
+    logrrr (>= 0.0.1)
+Remotes:
+    metrumresearchgroup/logrrr
