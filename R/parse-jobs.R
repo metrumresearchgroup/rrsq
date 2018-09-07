@@ -9,7 +9,7 @@ jobs_to_df <- function(.jl){
   if ("ID" %in% names(.jl)) {
     .jl <- list(.jl)
   }
-    purrr::map_dfr(.jl, function(.j) {
+    result <- purrr::map_dfr(.jl, function(.j) {
       details <- dplyr::as_data_frame(.j$RunDetails)
       result <- dplyr::as_data_frame(.j$Result)
       .j$Result <- NULL
@@ -19,4 +19,6 @@ jobs_to_df <- function(.jl){
         dplyr::mutate_at(dplyr::vars(dplyr::ends_with("_time")), as.POSIXct) %>%
         dplyr::mutate(duration = time_difference(end_time, start_time, units = "secs"))
     })
+    names(result) <- toupper(names(result))
+    return(result)
 }
