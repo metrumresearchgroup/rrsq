@@ -33,8 +33,8 @@
       "User"= jsonlite::unbox(user),
       "Context"= jsonlite::unbox(context),
       "Rscript"= list(
-        "r_path"= r_details$r_path,
-        "work_dir"= r_details$work_dir,
+        "r_path"= jsonlite::unbox(r_details$r_path),
+        "work_dir"= jsonlite::unbox(r_details$work_dir),
         "rscript_path"= jsonlite::unbox(rscript_path),
         "renv"= r_details$renv
       )

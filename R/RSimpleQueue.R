@@ -57,14 +57,14 @@ RSimpleQueue <-
                 lgr = NULL,
                 initialize = function(init = NULL,
                                       host = "http://localhost",
-                                      port = 3333,
+                                      port = 8950,
                                       verbose = TRUE,
                                       must_work = TRUE,
                                       lgr = NULL) {
                   if (!is.null(init)) {
                     stop("init functionality not yet implemented")
                   }
-                  if (is.null(lg)) {
+                  if (is.null(lgr)) {
                     self$lgr <- logrrr::Logrrr$new()
                   } else {
                     self$lgr <- lgr
@@ -95,7 +95,7 @@ RSimpleQueue <-
                   }
                   return(FALSE)
                 },
-                submit_job = function(srvr,
+                submit_job = function(
                                       user,
                                       context,
                                       rscript_path,
@@ -106,17 +106,21 @@ RSimpleQueue <-
                                       .parse = TRUE
                 )  {
                   resp <- .submit_job(
-                    glue("{private$address}/models"),
+                    srvr = glue("{private$address}/job"),
                     user = user,
                     context = context,
                     rscript_path = rscript_path,
                     work_dir = work_dir,
                     r_path = r_path,
                     renv = renv,
-                    .no_submit = .no_submit,
-                    .parse = .parse
+                    .no_submit = .no_submit
                   )
-                  return(resp)
+                  output <- if (.parse) {
+                    parse_response(resp)
+                  } else {
+                    resp
+                  }
+                  return(output)
                 },
                 get_jobs = function(status = NULL, STATUSES = c("QUEUED", "RUNNING", "COMPLETED", "ERROR"), parse = TRUE) {
                   if (is.null(status)) {
@@ -133,45 +137,11 @@ RSimpleQueue <-
                   return(jobs_resp)
                 },
                 get_job = function(id, parse = TRUE) {
-                  job_resp <- safe_get(glue("{address}/jobs/{id}", address = private$address))$result
+                  job_resp <- safe_get(glue("{address}/job/{id}", address = private$address))$result
                   if (parse) {
                     return(parse_response(job_resp))
                   }
                   return(job_resp)
-                },
-                poll = function(.ids,
-                                until = c("COMPLETED", "ERROR"),
-                                timeout = Inf,
-                                interval = 1,
-                                print = FALSE,
-                                parse = TRUE) {
-                  start_time <- Sys.time()
-                  tick <- time_difference(Sys.time(), start_time)
-                  while(tick < timeout) {
-                    # this could easily be optimized to track which models have met the until status
-                    # and stop polling them.
-                    resp <- purrr::map(.ids, ~ self$get_model(.x, parse = parse))
-                    until_status <- purrr::map_lgl(resp, ~ .x$status %in% until)
-                    if (!all(until_status)) {
-                      if (print) {
-                        purrr::walk2(resp, until_status, function(.m, .s) {
-                          message(glue("model {.m$id}, ready: {.s}, status: {.m$status}"))
-                        })
-                      }
-                      Sys.sleep(interval)
-                      tick <- time_difference(Sys.time(), start_time)
-                    } else {
-                      # will be parsed or not during the self$get_model
-                      return(resp)
-                    }
-                  }
-                  if (print) {
-                    warning("timed out!")
-                  }
-                  # right now returning null if not all complete, however it may also be reasonable
-                  # to return all the ones that did complete in that timeframe, or even just the last resp
-                  # so the user can decide what to do downstream. Maybe nested list(complete = TRUE/FALSE, resp = resp)
-                  return(NULL)
                 }
               ),
               private = list(
