@@ -21,3 +21,4 @@ Imports:
     logrrr (>= 0.0.1)
 Remotes:
     metrumresearchgroup/logrrr
+License: MIT + file LICENSE
