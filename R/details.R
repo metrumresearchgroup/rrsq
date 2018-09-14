@@ -6,7 +6,7 @@
 #' to set
 #' @export
 collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
-  rpath <- file.path(R.home("bin"), "R")
+  r_path <- file.path(R.home("bin"), "R")
   envs <- Sys.getenv()
   renvs <- as.list(envs[grepl(pattern = "^R_.*", names(envs))])
   if (!is.null(.envs)) {
@@ -19,10 +19,9 @@ collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
     .pkgs
   }
   list(
-    rpath = rpath,
-    renvs = renvs,
-    loaded_pkgs = loaded_pkgs,
-    cwd = getwd()
+    r_path = r_path,
+    renv = renvs,
+    work_dir = getwd()
   )
 }
 
@@ -30,9 +29,9 @@ collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
 #' @param .x list from collect_r_details()
 #' @export
 unbox_details <- function(.x) {
-  .x$rpath <- jsonlite::unbox(.x$rpath)
-  .x$renvs <- lapply(.x$renvs, jsonlite::unbox)
-  .x$cwd <- jsonlite::unbox(.x$cwd)
+  .x$r_path <- jsonlite::unbox(.x$r_path)
+  .x$renv <- lapply(.x$renv, jsonlite::unbox)
+  .x$work_dir <- jsonlite::unbox(.x$work_dir)
   return(.x)
 }
 

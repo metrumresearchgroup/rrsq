@@ -2,6 +2,12 @@
 
 export("%>%")
 export("%||%")
+export(.submit_job)
+export(RSimpleQueue)
 export(collect_r_details)
+export(jobs_to_df)
+export(time_difference)
 export(unbox_details)
+importFrom(R6,R6Class)
+importFrom(glue,glue)
 importFrom(magrittr,"%>%")
