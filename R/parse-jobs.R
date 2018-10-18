@@ -10,11 +10,11 @@ jobs_to_df <- function(.jl){
     .jl <- list(.jl)
   }
     result <- purrr::map_dfr(.jl, function(.j) {
-      details <- dplyr::as_data_frame(.j$RunDetails)
-      result <- dplyr::as_data_frame(.j$Result)
-      .j$Result <- NULL
-      .j$RunDetails <- NULL
-      .j$Rscript <- NULL
+      details <- dplyr::as_data_frame(.j$run_details)
+      result <- dplyr::as_data_frame(.j$result)
+      .j$result <- NULL
+      .j$run_details <- NULL
+      .j$rscript <- NULL
       dplyr::as_data_frame(.j) %>% dplyr::bind_cols(details, result) %>%
         dplyr::mutate_at(dplyr::vars(dplyr::ends_with("_time")), as.POSIXct) %>%
         dplyr::mutate(duration = time_difference(end_time, start_time, units = "secs"))
