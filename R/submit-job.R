@@ -28,11 +28,11 @@
     r_details$renv <- renv
   }
   submission_values <- list(
-      "ID"= jsonlite::unbox(0),
-      "Status"= jsonlite::unbox("QUEUED"),
-      "User"= jsonlite::unbox(user),
-      "Context"= jsonlite::unbox(context),
-      "Rscript"= list(
+      "id"= jsonlite::unbox(0),
+      "status"= jsonlite::unbox("QUEUED"),
+      "user"= jsonlite::unbox(user),
+      "context"= jsonlite::unbox(context),
+      "rscript"= list(
         "r_path"= jsonlite::unbox(r_details$r_path),
         "work_dir"= jsonlite::unbox(r_details$work_dir),
         "rscript_path"= jsonlite::unbox(rscript_path),
