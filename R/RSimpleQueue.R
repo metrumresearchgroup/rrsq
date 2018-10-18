@@ -115,7 +115,7 @@ RSimpleQueue <-
                     renv = renv,
                     .no_submit = .no_submit
                   )
-                  output <- if (.parse) {
+                  output <- if (.parse && !.no_submit) {
                     parse_response(resp)
                   } else {
                     resp
