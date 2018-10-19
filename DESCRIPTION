@@ -1,7 +1,7 @@
 Package: rrsq
 Type: Package
 Title: R interface to r simple queue (rsq)
-Version: 0.0.1
+Version: 0.0.2
 Description: An R interface to r simple queue (rsq).
 Encoding: UTF-8
 LazyData: true
@@ -22,3 +22,5 @@ Imports:
 Remotes:
     metrumresearchgroup/logrrr
 License: MIT + file LICENSE
+Suggests: 
+    testthat
