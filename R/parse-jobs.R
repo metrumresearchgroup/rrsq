@@ -6,7 +6,7 @@
 #' @export
 jobs_to_df <- function(.jl){
   # only single job, lets convert it to a list so retains same list-like nature
-  if ("ID" %in% names(.jl)) {
+  if ("id" %in% names(.jl)) {
     .jl <- list(.jl)
   }
     result <- purrr::map_dfr(.jl, function(.j) {
