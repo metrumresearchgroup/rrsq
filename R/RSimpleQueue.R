@@ -142,6 +142,13 @@ RSimpleQueue <-
                     return(parse_response(job_resp))
                   }
                   return(job_resp)
+                },
+                cancel_job = function(id) {
+                  job_resp <- safe_put(glue("{address}/job/cancel/{id}", address = private$address))$result
+                  if (parse) {
+                    return(parse_response(job_resp))
+                  }
+                  return(job_resp)
                 }
               ),
               private = list(

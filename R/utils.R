@@ -21,6 +21,7 @@
 
 
 safe_get <- purrr::safely(httr::GET)
+safe_put <- purrr::safely(httr::PUT)
 
 parse_response <- function(resp) {
   if (!is.null(resp)) {
