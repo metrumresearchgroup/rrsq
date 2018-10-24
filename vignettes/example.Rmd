@@ -11,13 +11,22 @@ library(purrr)
 
 ```{r}
 rsq <- RSimpleQueue$new()
-rsq$get_jobs() %>% jobs_to_df()
+rsq$get_jobs() %>% jobs_to_df() %>% tail
 ```
 
 ```{r}
 wd <- normalizePath(getwd())
 jid <- rsq$submit_job(user = "devin", context = 'test job', work_dir = wd, rscript_path = "add_script.R")
-rsq$get_job(jid$ID) %>% jobs_to_df()
+rsq$get_job(jid$id, TRUE) %>% jobs_to_df()
 ```
+
+```{r}
+rsq$cancel_job(jid$id)
+```
+
+```{r}
+jsonlite::fromJSON(jid)
+```
+
 
 
