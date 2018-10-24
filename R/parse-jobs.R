@@ -7,12 +7,11 @@ job_to_df <- function(.j) {
     status = .j$status,
     context = .j$context,
     user = .j$user,
-    queue_time = .j$run_details$queue_time,
-    start_time = .j$run_details$start_time,
-    end_time = .j$run_details$end_time,
+    queue_time = .j$run_details$queue_time %||% NA,
+    start_time = .j$run_details$start_time %||% NA,
+    end_time = .j$run_details$end_time %||% NA,
     exit_code = .j$result$exit_code,
-    output = .j$result$output
-  )
+    output = .j$result$output %||% NA, stringsAsFactors = FALSE)
 }
 
 #' convert list of jobs returned from db to a tidy dataframe
