@@ -1,3 +1,21 @@
+to_datetime <- function(.x) {
+  as.POSIXct(strptime(.x, format = "%Y-%m-%dT%H:%M%OS",tz = "UTC"))
+}
+
+job_to_df <- function(.j) {
+  data.frame(
+    id = .j$id,
+    status = .j$status,
+    context = .j$context,
+    user = .j$user,
+    queue_time = .j$run_details$queue_time,
+    start_time = .j$run_details$start_time,
+    end_time = .j$run_details$end_time,
+    exit_code = .j$result$exit_code,
+    output = .j$result$output
+  )
+}
+dplyr::mutate(duration = time_difference(end_time, start_time, units = "secs"))
 #' convert list of jobs returned from db to a tidy dataframe
 #' @param .jl job list
 #' @details
@@ -9,16 +27,10 @@ jobs_to_df <- function(.jl){
   if ("id" %in% names(.jl)) {
     .jl <- list(.jl)
   }
-    result <- purrr::map_dfr(.jl, function(.j) {
-      details <- dplyr::as_data_frame(.j$run_details)
-      result <- dplyr::as_data_frame(.j$result)
-      .j$result <- NULL
-      .j$run_details <- NULL
-      .j$rscript <- NULL
-      dplyr::as_data_frame(.j) %>% dplyr::bind_cols(details, result) %>%
-        dplyr::mutate_at(dplyr::vars(dplyr::ends_with("_time")), as.POSIXct) %>%
-        dplyr::mutate(duration = time_difference(end_time, start_time, units = "secs"))
-    })
-    names(result) <- toupper(names(result))
+    result <- purrr::map_dfr(.jl, job_to_df)
+    result$queue_time <- to_datetime(result$queue_time)
+    result$start_time <- to_datetime(result$start_time)
+    result$end_time <- to_datetime(result$end_time)
+    result$duration <- time_difference(result$end_time, result$start_time, units = "secs")
     return(result)
 }
