@@ -14,7 +14,6 @@ RoxygenNote: 6.1.0
 Imports: 
     R6,
     purrr,
-    dplyr,
     magrittr,
     httr,
     jsonlite,
