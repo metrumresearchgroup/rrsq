@@ -1,7 +1,6 @@
 to_datetime <- function(.x) {
   as.POSIXct(strptime(.x, format = "%Y-%m-%dT%H:%M%OS",tz = "UTC"))
 }
-
 job_to_df <- function(.j) {
   data.frame(
     id = .j$id,
@@ -15,7 +14,7 @@ job_to_df <- function(.j) {
     output = .j$result$output
   )
 }
-dplyr::mutate(duration = time_difference(end_time, start_time, units = "secs"))
+
 #' convert list of jobs returned from db to a tidy dataframe
 #' @param .jl job list
 #' @details
