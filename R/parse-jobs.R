@@ -25,10 +25,17 @@ jobs_to_df <- function(.jl){
   if ("id" %in% names(.jl)) {
     .jl <- list(.jl)
   }
-    result <- purrr::map_dfr(.jl, job_to_df)
+    result <- map_dfr(.jl, job_to_df)
     result$queue_time <- to_datetime(result$queue_time)
     result$start_time <- to_datetime(result$start_time)
     result$end_time <- to_datetime(result$end_time)
     result$duration <- time_difference(result$end_time, result$start_time, units = "secs")
     return(result)
+}
+
+# don't use purrr as requires dplyr for map_dfr
+map_dfr <- function(.x, .f, ...) {
+  data.table::rbindlist(lapply(.x, .f, ...),
+                        use.names = TRUE,
+                        fill = TRUE)
 }
