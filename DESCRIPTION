@@ -10,14 +10,15 @@ Authors@R:
            family = "Pastoor",
            role = c("aut", "cre"),
            email = "devin.pastoor@gmail.com")
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Imports: 
     R6,
     purrr,
     magrittr,
     httr,
     jsonlite,
-    logrrr (>= 0.0.1)
+    logrrr (>= 0.0.1),
+    glue
 Remotes:
     metrumresearchgroup/logrrr
 License: MIT + file LICENSE
