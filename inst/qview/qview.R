@@ -11,6 +11,7 @@ queueViewOutput <- function(id) {
 queueView <- function(input, output, session) {
   output$queue <- renderTable(
     {
+      invalidateLater(1000, session)
       queueObj <- rrsq::RSimpleQueue$new()
       # Check null, error, etc.
 
