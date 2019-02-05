@@ -3,15 +3,15 @@ to_datetime <- function(.x) {
 }
 job_to_df <- function(.j) {
   data.frame(
-    id = .j$id,
-    status = .j$status,
-    context = .j$context,
-    user = .j$user,
-    queue_time = .j$run_details$queue_time %||% NA,
-    start_time = .j$run_details$start_time %||% NA,
-    end_time = .j$run_details$end_time %||% NA,
-    exit_code = .j$result$exit_code,
-    output = .j$result$output %||% NA, stringsAsFactors = FALSE)
+    id = .j$ID,
+    status = .j$Status,
+    context = .j$Context,
+    user = .j$User,
+    queue_time = .j$RunDetails$queue_time %||% NA,
+    start_time = .j$RunDetails$start_time %||% NA,
+    end_time = .j$RunDetails$end_time %||% NA,
+    exit_code = .j$Result$exit_code,
+    output = .j$Result$output %||% NA, stringsAsFactors = FALSE)
 }
 
 #' convert list of jobs returned from db to a tidy dataframe
