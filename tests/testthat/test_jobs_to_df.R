@@ -22,12 +22,12 @@ test_that(desc = "Dataframe is returned from job_to_df (singular)", {
 testthat::test_that(desc = "Dataframe is returned from jobs_to_df", {
   jobs <- dget(file = system.file("tests/testthat/job_list_four_items.txt", package = "rrsq"))
 
-  tryCatch({
-    result <- jobs_to_df(jobs)
+  result <- tryCatch({
+    jobs_to_df(jobs)
   }, error = function(e){
     testthat::fail(message = paste0("Error occured during test: ", e$message))
   })
-  testthat::expect_equal(object = length(result), expected = 10)
+  testthat::expect_equal(object = nrow(result), expected = 9)
   testthat::expect_true(is.data.frame(result))
 
 })
