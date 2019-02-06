@@ -7,7 +7,7 @@ action_button_creator <- function(index, .ns) {
     as.character(
       actionButton(
         as.character(index),
-        glue::glue("index{index}"),
+        glue::glue("Cancel"),
         # onclick = 'Shiny.onInputChange(\"select_button\",  this.id)'
         onclick = paste0('Shiny.onInputChange(\"', .ns("select_button"), '\",  this.id)')
       )
@@ -25,7 +25,6 @@ queueViewOutput <- function(id) {
   ns <- NS(id)
   tagList(
     textOutput(ns("message")),
-    actionButton(ns("sampleButton"),"Debug Now"),
     DT::dataTableOutput(ns("queue_table"))
   )
 }
@@ -38,9 +37,7 @@ queueViewOutput <- function(id) {
 queueView <- function(input, output, session, queue_obj = rrsq::RSimpleQueue$new()) {
 
   ns <- session$ns
-
   queue_obj = rrsq::RSimpleQueue$new()
-
   .rv <- reactiveValues()
   .rv$queue_data <- rrsq::jobs_to_df(queue_obj$get_jobs()) %>% dplyr::arrange(desc(id))
 
@@ -74,24 +71,16 @@ queueView <- function(input, output, session, queue_obj = rrsq::RSimpleQueue$new
     return(glue::glue("Output Message: {selected_row$id}"))
   })
 
-  observeEvent(selected_index, {
+  observe({
     index <- as.numeric(selected_index())
     selected_row <- .rv$queue_data %>% slice(index)
-    # browser()
-    print("We made it, boys.")
-    # queue_obj$cancel_job(selected_row$id)
-  })
-
-  observeEvent(input$sampleButton, {
-    print("Debugging.")
-    browser()
+    print(glue::glue("Cancelling:{selected_row$id}"))
+    queue_obj$cancel_job(selected_row$id)
   })
 }
 
 
 ## Testing ####
-
-
 
 ui <- fluidPage(
   queueViewOutput("id_i_provided")
