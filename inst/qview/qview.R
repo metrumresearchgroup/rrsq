@@ -2,17 +2,21 @@ library(shiny)
 library(tidyverse)
 library(DT)
 
-action_button_creator <- function(index) {
+action_button_creator <- function(index, .ns) {
   return(
     as.character(
       actionButton(
         as.character(index),
-        glue::glue("Cancel Job"),
-        onclick = 'Shiny.onInputChange(\"select_button\",  this.id)'
+        glue::glue("index{index}"),
+        # onclick = 'Shiny.onInputChange(\"select_button\",  this.id)'
+        onclick = paste0('Shiny.onInputChange(\"', .ns("select_button"), '\",  this.id)')
       )
     )
   )
 }
+
+
+######## UI ########
 
 #' queueViewOutput
 #' @export
@@ -20,14 +24,21 @@ queueViewOutput <- function(id) {
 
   ns <- NS(id)
   tagList(
-    DT::dataTableOutput(ns("queue_table")),
-    textOutput(ns("cancel_confirmation"))
+    textOutput(ns("message")),
+    actionButton(ns("sampleButton"),"Debug Now"),
+    DT::dataTableOutput(ns("queue_table"))
   )
 }
+
+
+###`~~~~~~~~~~~~~~~~~~~~` SERVER ########
 
 #' queueView
 #' @export
 queueView <- function(input, output, session, queue_obj = rrsq::RSimpleQueue$new()) {
+
+  ns <- session$ns
+
   queue_obj = rrsq::RSimpleQueue$new()
 
   .rv <- reactiveValues()
@@ -46,27 +57,34 @@ queueView <- function(input, output, session, queue_obj = rrsq::RSimpleQueue$new
 
   output$queue_table  <- DT::renderDT(
     {
-      .rv$queue_data %>% mutate(cancel_button = map_chr(1:n(), action_button_creator)) %>% dplyr::select(cancel_button, everything())
+      .rv$queue_data %>%
+        mutate(cancel_button = map_chr(1:n(), action_button_creator, .ns = ns)) %>%
+        dplyr::select(cancel_button, everything())
     },
     escape = FALSE
   )
 
   selected_index <- eventReactive(input$select_button, {
-    # browser()
-    input$select_button$id
+    return(input$select_button)
+  })
+
+  output$message <- renderText({
+    index <- as.numeric(selected_index())
+    selected_row <- .rv$queue_data %>% slice(index)
+    return(glue::glue("Output Message: {selected_row$id}"))
   })
 
   observeEvent(selected_index, {
     index <- as.numeric(selected_index())
-    selected_row <- .rv$queue_data() %>% slice(index)
-    queue_obj$cancel_job(selected_row$id)
+    selected_row <- .rv$queue_data %>% slice(index)
+    # browser()
+    print("We made it, boys.")
+    # queue_obj$cancel_job(selected_row$id)
   })
 
-  output$cancel_confirmation <- renderText({
-    index <- as.numeric(selected_index())
-    # selected_row <- .rv$queue_data() %>% slice(index)
-    # return(glue::glue("cancelling: {selected_row$id}"))
-    return(glue::glue("message{lubridate::now()}!"))
+  observeEvent(input$sampleButton, {
+    print("Debugging.")
+    browser()
   })
 }
 
@@ -76,13 +94,13 @@ queueView <- function(input, output, session, queue_obj = rrsq::RSimpleQueue$new
 
 
 ui <- fluidPage(
-  queueViewOutput("q")
+  queueViewOutput("id_i_provided")
 
 
 )
 
 server <- function(input, output, session) {
-  whatDoesThisVariableDo <- callModule(queueView, "q", queue_obj = rrsq::RSimpleQueue$new())
+  whatDoesThisVariableDo <- callModule(queueView, "id_i_provided", queue_obj = rrsq::RSimpleQueue$new())
 }
 
 shinyApp(ui = ui, server = server)
