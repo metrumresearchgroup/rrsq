@@ -29,14 +29,23 @@ queueViewOutput <- function(id) {
 queueView <- function(input, output, session, queue_obj = rrsq::RSimpleQueue$new()) {
   queue_obj = rrsq::RSimpleQueue$new()
 
-  queue_data <- reactive({
-    rrsq::jobs_to_df(queue_obj$get_jobs())
+  .rv <- reactiveValues()
+  .rv$queue_data <- rrsq::jobs_to_df(queue_obj$get_jobs()) %>% dplyr::arrange(desc(id))
+
+  observe({
+    invalidateLater(1000)
+    new_data <- rrsq::jobs_to_df(queue_obj$get_jobs()) %>% dplyr::arrange(desc(id))
+
+    if (
+      !isTRUE(all_equal(.rv$queue_data, new_data))
+      ) {
+      .rv$queue_data <- new_data
+    }
   })
 
   output$queue_table  <- DT::renderDT(
     {
-      # invalidateLater(1000)
-      queue_data() %>% mutate(button = map_chr(1:n(), action_button_creator))
+      .rv$queue_data %>% mutate(button = map_chr(1:n(), action_button_creator))
     },
     escape = FALSE
   )
@@ -47,13 +56,13 @@ queueView <- function(input, output, session, queue_obj = rrsq::RSimpleQueue$new
 
   observeEvent(selected_index, {
     index <- as.numeric(selected_index())
-    selected_row <- queue_data() %>% slice(index)
+    selected_row <- .rv$queue_data() %>% slice(index)
     queue_obj$cancel_job(selected_row$id)
   })
 
   output$cancel_confirmation <- renderText({
     index <- as.numeric(selected_index())
-    selected_row <- queue_data() %>% slice(index)
+    selected_row <- .rv$queue_data() %>% slice(index)
     return(glue::glue("cancelling: {selected_row$id}"))
   })
 }
