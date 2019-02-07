@@ -4,6 +4,13 @@ library(DT)
 
 ## Support Functions ####
 
+whoami <- function(session, .mock_user = "UNKNOWN") {
+  if (!is.null(session$user)) {
+    return(session$user)
+  }
+  return(.mock_user)
+}
+
 #' Function to create a cancel button to be rendered in a Data Table.
 #' @param index The index of the Data Table row that the button will be placed in.
 #' @param .ns The namespace function that should be applied to the button's ID.
@@ -50,12 +57,19 @@ queueView <- function(
     input,
     output,
     session,
-    queue_obj = rrsq::RSimpleQueue$new()
+    queue_obj = rrsq::RSimpleQueue$new(),
+    .user
   ) {
 
   # Grab the namespace function used in the UI object.
   # We will need this for creating the individual buttons in the list.
   ns <- session$ns
+
+
+
+  print("Starting.")
+  print(glue::glue("User: {.user}"))
+  # browser()
 
   # Get an RSQ object, which contains the methods needed for interacting with the Queue.
   queue_obj = rrsq::RSimpleQueue$new()
@@ -65,7 +79,10 @@ queueView <- function(
   #   sort the contents by ID (descending). We then assign this to as a component of a
   #   reactiveValue for easy-access in other reactive contexts.
   .rv <- reactiveValues()
-  .rv$queue_data <- rrsq::jobs_to_df(queue_obj$get_jobs()) %>% dplyr::arrange(desc(id))
+  .rv$queue_data <-
+    rrsq::jobs_to_df(queue_obj$get_jobs()) %>%
+    dplyr::filter(user == .user) %>%
+    dplyr::arrange(desc(id))
 
   # Create an observe event that re-runs (via invalidation) every 1000 milliseconds.
   # In this section, we grab an updated version of our data frame and compare it
@@ -74,7 +91,10 @@ queueView <- function(
   #   checks for new data.
   observe({
     invalidateLater(1000)
-    new_data <- rrsq::jobs_to_df(queue_obj$get_jobs()) %>% dplyr::arrange(desc(id))
+    new_data <-
+      rrsq::jobs_to_df(queue_obj$get_jobs()) %>%
+      dplyr::filter(user == .user) %>%
+      dplyr::arrange(desc(id))
 
     if (
       !isTRUE(all_equal(.rv$queue_data, new_data))
@@ -125,7 +145,19 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  whatDoesThisVariableDo <- callModule(queueView, "made_up_id", queue_obj = rrsq::RSimpleQueue$new())
+  print("server1")
+  # browser()
+  print(session$user)
+  print("server2")
+  whatDoesThisVariableDo <- callModule(
+    queueView,
+    "made_up_id",
+    queue_obj = rrsq::RSimpleQueue$new(),
+    .user = whoami(session = session, .mock_user = "Professor Pouch")
+  )
+
+
+
 }
 
 shinyApp(ui = ui, server = server)
