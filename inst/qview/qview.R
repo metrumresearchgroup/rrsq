@@ -110,8 +110,19 @@ queueView <- function(
   #   function in order to properly namespace the buttons with this module's UI namespace.
   output$queue_table  <- DT::renderDT(
     {
+
+      if(nrow(.rv$queue_data) > 0) {
+        cancel_button_column <- map_chr(
+          1:nrow(.rv$queue_data),
+          cancel_button_creator,
+          .ns = ns
+        )
+      } else {
+        cancel_button_column <- list()
+      }
+
       .rv$queue_data %>%
-        mutate(cancel_button = map_chr(1:n(), cancel_button_creator, .ns = ns)) %>%
+        mutate(cancel_button = cancel_button_column) %>%
         dplyr::select(cancel_button, everything())
     },
     escape = FALSE
@@ -153,7 +164,8 @@ server <- function(input, output, session) {
     queueView,
     "made_up_id",
     queue_obj = rrsq::RSimpleQueue$new(),
-    .user = whoami(session = session, .mock_user = "Professor Pouch")
+    #.user = whoami(session = session, .mock_user = "Professor Pouch")
+    .user = whoami(session = session, .mock_user = "Sheersa")
   )
 
 
