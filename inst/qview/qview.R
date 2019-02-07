@@ -4,6 +4,7 @@ library(DT)
 
 ## Support Functions ####
 
+#' Function to get the user, or a mock user when the user isn't available.
 whoami <- function(session, .mock_user = "UNKNOWN") {
   if (!is.null(session$user)) {
     return(session$user)
@@ -51,6 +52,7 @@ queueViewOutput <- function(id) {
 #' @param output Shiny output
 #' @param session Shiny session
 #' @param queue_obj An rrsq::RSimpleQueue object that has already been initialized with $new.
+#' @param refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
 #' @importFrom rrsq::RSimpleQueue
 #' @export
 queueView <- function(
@@ -58,7 +60,8 @@ queueView <- function(
     output,
     session,
     queue_obj = rrsq::RSimpleQueue$new(),
-    .user
+    .user,
+    .refresh_interval = 3000
   ) {
 
   # Grab the namespace function used in the UI object.
@@ -90,7 +93,7 @@ queueView <- function(
   #   frame in use. This prevents the UI from constantly refreshing every time it
   #   checks for new data.
   observe({
-    invalidateLater(1000)
+    invalidateLater(.refresh_interval)
     new_data <-
       rrsq::jobs_to_df(queue_obj$get_jobs()) %>%
       dplyr::filter(user == .user) %>%
