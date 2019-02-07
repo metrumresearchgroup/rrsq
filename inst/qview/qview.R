@@ -25,12 +25,11 @@ cancel_button_creator <- function(index, .ns) {
       actionButton(
         as.character(index),
         glue::glue("Cancel"),
-        onclick = paste0('Shiny.onInputChange(\"', .ns("select_button"), '\",  this.id)')
+        onclick = paste0('Shiny.onInputChange(\"', .ns("cancel_button"), '\",  this.id)')
       )
     )
   )
 }
-
 
 ## UI ####
 
@@ -68,8 +67,6 @@ queueView <- function(
   # We will need this for creating the individual buttons in the list.
   ns <- session$ns
 
-
-
   print("Starting.")
   print(glue::glue("User: {.user}"))
   # browser()
@@ -86,6 +83,8 @@ queueView <- function(
     rrsq::jobs_to_df(queue_obj$get_jobs()) %>%
     dplyr::filter(user == .user) %>%
     dplyr::arrange(desc(id))
+
+  .return_values <- reactiveValues()
 
   # Create an observe event that re-runs (via invalidation) every 1000 milliseconds.
   # In this section, we grab an updated version of our data frame and compare it
@@ -128,42 +127,60 @@ queueView <- function(
         mutate(cancel_button = cancel_button_column) %>%
         dplyr::select(cancel_button, everything())
     },
-    escape = FALSE
+    escape = FALSE,
+    selection = "single"
   )
+
+
 
   # Create an eventReactive for when Cancel buttons are pushed.
   # This eventReactive triggers whenever a Cancel button is pushed. All Cancel buttons are
-  #   treated as as if they had the id ns("select_button") (this is set up in
+  #   treated as as if they had the id ns("cancel_button") (this is set up in
   #   cancel_button_creator). It saves the index of the row where the button was clicked.
-  selected_index <- eventReactive(input$select_button, {
-    return(input$select_button)
+  cancel_index <- eventReactive(input$cancel_button, {
+    return(input$cancel_button)
   })
 
   # Submit the cancellation request
-  # Whenever the selected_index changes (after a cancel button is clicked), we get use the
+  # Whenever the cancel_index changes (after a cancel button is clicked), we get use the
   #   index to grab the relevant row from the table, from which we grab the job ID to be
   #   cancelled. We then use the queue_obj to submit the cancellation request.
   observe({
-    index <- as.numeric(selected_index())
+    index <- as.numeric(cancel_index())
     selected_row <- .rv$queue_data %>% slice(index)
     queue_obj$cancel_job(selected_row$id)
     print(glue::glue("Cancelling:{selected_row$id}"))
   })
+
+  # Create an eventReactive for when arow is selected.
+  selected_index <- eventReactive(input$queue_table_rows_selected, {
+    return(input$queue_table_rows_selected)
+  })
+
+  # When a row is clicked, update the .return_values$selected_row reactiveValue,
+  # which we return to the calling application.
+  observe({
+    index <- selected_index()
+    if(is.numeric(index)) {
+      .return_values$selected_row <- .rv$queue_data %>% slice(index)
+    }
+  })
+
+  # Return all return values to the calling application.
+  return(.return_values)
 }
 
 
 ## Testing ####
 
 ui <- fluidPage(
+  tableOutput("row"),
   queueViewOutput("made_up_id")
+
 )
 
 server <- function(input, output, session) {
-  print("server1")
-  # browser()
-  print(session$user)
-  print("server2")
-  whatDoesThisVariableDo <- callModule(
+  returns <- callModule(
     queueView,
     "made_up_id",
     queue_obj = rrsq::RSimpleQueue$new(),
@@ -171,8 +188,7 @@ server <- function(input, output, session) {
     .user = whoami(session = session, .mock_user = "Sheersa")
   )
 
-
-
+  output$row <- renderTable(returns$selected_row)
 }
 
 shinyApp(ui = ui, server = server)
