@@ -23,9 +23,10 @@ cancel_button_creator <- function(index, .ns) {
   return(
     as.character(
       actionButton(
-        as.character(index),
+        glue::glue("cancel_button_{as.character(index)}"),
         glue::glue("Cancel"),
-        onclick = paste0('Shiny.onInputChange(\"', .ns("cancel_button"), '\",  this.id)')
+        row_index = index,
+        onclick = paste0('Shiny.onInputChange(\"', .ns("cancel_button"), '\",  this.attributes.row_index.value)')
       )
     )
   )
@@ -50,6 +51,7 @@ queueViewOutput <- function(id) {
 #' @param input Shiny input
 #' @param output Shiny output
 #' @param session Shiny session
+#' @param .user The current user of the shiny application. Used for filtering which jobs are visible.
 #' @param queue_obj An rrsq::RSimpleQueue object that has already been initialized with $new.
 #' @param refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
 #' @importFrom rrsq::RSimpleQueue
@@ -58,21 +60,14 @@ queueView <- function(
     input,
     output,
     session,
-    queue_obj = rrsq::RSimpleQueue$new(),
     .user,
+    queue_obj = rrsq::RSimpleQueue$new(),
     .refresh_interval = 3000
   ) {
 
   # Grab the namespace function used in the UI object.
   # We will need this for creating the individual buttons in the list.
   ns <- session$ns
-
-  print("Starting.")
-  print(glue::glue("User: {.user}"))
-  # browser()
-
-  # Get an RSQ object, which contains the methods needed for interacting with the Queue.
-  queue_obj = rrsq::RSimpleQueue$new()
 
   # Initialize our data frame, "queue_data".
   # We pull the source data with queue_obj$get_jobs, then convert it to a data frame and
@@ -99,7 +94,7 @@ queueView <- function(
       dplyr::arrange(desc(id))
 
     if (
-      !isTRUE(all_equal(.rv$queue_data, new_data))
+      !isTRUE(dplyr::all_equal(.rv$queue_data, new_data))
       ) {
       .rv$queue_data <- new_data
     }
@@ -120,11 +115,11 @@ queueView <- function(
           .ns = ns
         )
       } else {
-        cancel_button_column <- list()
+        cancel_button_column <- ""
       }
 
       .rv$queue_data %>%
-        mutate(cancel_button = cancel_button_column) %>%
+        dplyr::mutate(cancel_button = cancel_button_column) %>%
         dplyr::select(cancel_button, everything())
     },
     escape = FALSE,
@@ -146,6 +141,7 @@ queueView <- function(
   #   index to grab the relevant row from the table, from which we grab the job ID to be
   #   cancelled. We then use the queue_obj to submit the cancellation request.
   observe({
+    # browser()
     index <- as.numeric(cancel_index())
     selected_row <- .rv$queue_data %>% slice(index)
     queue_obj$cancel_job(selected_row$id)
