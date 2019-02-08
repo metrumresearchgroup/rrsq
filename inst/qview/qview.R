@@ -1,7 +1,3 @@
-library(shiny)
-library(tidyverse)
-library(DT)
-
 ## Support Functions ####
 
 #' Function to get the user, or a mock user when the user isn't available.
@@ -22,7 +18,7 @@ whoami <- function(session, .mock_user = "UNKNOWN") {
 cancel_button_creator <- function(index, .ns) {
   return(
     as.character(
-      actionButton(
+      shiny::actionButton(
         glue::glue("cancel_button_{as.character(index)}"),
         glue::glue("Cancel"),
         row_index = index,
@@ -39,8 +35,8 @@ cancel_button_creator <- function(index, .ns) {
 #' @importFrom DT dataTableOutput
 #' @export
 queueViewOutput <- function(id) {
-  ns <- NS(id)
-  tagList(
+  ns <- shiny::NS(id)
+  shiny::tagList(
     DT::dataTableOutput(ns("queue_table"))
   )
 }
@@ -57,13 +53,13 @@ queueViewOutput <- function(id) {
 #' @importFrom rrsq::RSimpleQueue
 #' @export
 queueView <- function(
-    input,
-    output,
-    session,
-    .user,
-    queue_obj = rrsq::RSimpleQueue$new(),
-    .refresh_interval = 3000
-  ) {
+  input,
+  output,
+  session,
+  .user,
+  queue_obj = rrsq::RSimpleQueue$new(),
+  .refresh_interval = 3000
+) {
 
   # Grab the namespace function used in the UI object.
   # We will need this for creating the individual buttons in the list.
@@ -73,29 +69,29 @@ queueView <- function(
   # We pull the source data with queue_obj$get_jobs, then convert it to a data frame and
   #   sort the contents by ID (descending). We then assign this to as a component of a
   #   reactiveValue for easy-access in other reactive contexts.
-  .rv <- reactiveValues()
+  .rv <- shiny::reactiveValues()
   .rv$queue_data <-
     rrsq::jobs_to_df(queue_obj$get_jobs()) %>%
     dplyr::filter(user == .user) %>%
-    dplyr::arrange(desc(id))
+    dplyr::arrange(dplyr::desc(id))
 
-  .return_values <- reactiveValues()
+  .return_values <- shiny::reactiveValues()
 
   # Create an observe event that re-runs (via invalidation) every 1000 milliseconds.
   # In this section, we grab an updated version of our data frame and compare it
   #   to the one currently in use. If any differences are found, we upate the data
   #   frame in use. This prevents the UI from constantly refreshing every time it
   #   checks for new data.
-  observe({
-    invalidateLater(.refresh_interval)
+  shiny::observe({
+    shiny::invalidateLater(.refresh_interval)
     new_data <-
       rrsq::jobs_to_df(queue_obj$get_jobs()) %>%
       dplyr::filter(user == .user) %>%
-      dplyr::arrange(desc(id))
+      dplyr::arrange(dplyr::desc(id))
 
     if (
       !isTRUE(dplyr::all_equal(.rv$queue_data, new_data))
-      ) {
+    ) {
       .rv$queue_data <- new_data
     }
   })
@@ -108,19 +104,20 @@ queueView <- function(
   output$queue_table  <- DT::renderDT(
     {
 
-      if(nrow(.rv$queue_data) > 0) {
-        cancel_button_column <- map_chr(
-          1:nrow(.rv$queue_data),
-          cancel_button_creator,
-          .ns = ns
-        )
-      } else {
-        cancel_button_column <- ""
-      }
+      shiny::validate(
+        shiny::need(nrow(.rv$queue_data) > 0, "There are no jobs in the queue for the current user.")
+      )
+
+      cancel_button_column <- purrr::map_chr(
+        seq_len(nrow(.rv$queue_data)),
+        cancel_button_creator,
+        .ns = ns
+      )
 
       .rv$queue_data %>%
         dplyr::mutate(cancel_button = cancel_button_column) %>%
-        dplyr::select(cancel_button, everything())
+        dplyr::select(cancel_button, dplyr::everything())
+
     },
     escape = FALSE,
     selection = "single"
@@ -132,7 +129,7 @@ queueView <- function(
   # This eventReactive triggers whenever a Cancel button is pushed. All Cancel buttons are
   #   treated as as if they had the id ns("cancel_button") (this is set up in
   #   cancel_button_creator). It saves the index of the row where the button was clicked.
-  cancel_index <- eventReactive(input$cancel_button, {
+  cancel_index <- shiny::eventReactive(input$cancel_button, {
     return(input$cancel_button)
   })
 
@@ -140,25 +137,25 @@ queueView <- function(
   # Whenever the cancel_index changes (after a cancel button is clicked), we get use the
   #   index to grab the relevant row from the table, from which we grab the job ID to be
   #   cancelled. We then use the queue_obj to submit the cancellation request.
-  observe({
+  shiny::observe({
     # browser()
     index <- as.numeric(cancel_index())
-    selected_row <- .rv$queue_data %>% slice(index)
+    selected_row <- .rv$queue_data %>% dplyr::slice(index)
     queue_obj$cancel_job(selected_row$id)
     print(glue::glue("Cancelling:{selected_row$id}"))
   })
 
   # Create an eventReactive for when arow is selected.
-  selected_index <- eventReactive(input$queue_table_rows_selected, {
+  selected_index <- shiny::eventReactive(input$queue_table_rows_selected, {
     return(input$queue_table_rows_selected)
   })
 
   # When a row is clicked, update the .return_values$selected_row reactiveValue,
   # which we return to the calling application.
-  observe({
+  shiny::observe({
     index <- selected_index()
     if(is.numeric(index)) {
-      .return_values$selected_row <- .rv$queue_data %>% slice(index)
+      .return_values$selected_row <- .rv$queue_data %>% dplyr::slice(index)
     }
   })
 
@@ -169,14 +166,14 @@ queueView <- function(
 
 ## Testing ####
 
-ui <- fluidPage(
-  tableOutput("row"),
+ui <- shiny::fluidPage(
+  shiny::tableOutput("row"),
   queueViewOutput("made_up_id")
 
 )
 
 server <- function(input, output, session) {
-  returns <- callModule(
+  returns <- shiny::callModule(
     queueView,
     "made_up_id",
     queue_obj = rrsq::RSimpleQueue$new(),
@@ -184,7 +181,7 @@ server <- function(input, output, session) {
     .user = whoami(session = session, .mock_user = "Sheersa")
   )
 
-  output$row <- renderTable(returns$selected_row)
+  output$row <- shiny::renderTable(returns$selected_row)
 }
 
-shinyApp(ui = ui, server = server)
+shiny::shinyApp(ui = ui, server = server)
