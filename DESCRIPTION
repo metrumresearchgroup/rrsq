@@ -22,7 +22,8 @@ Imports:
     DT,
     dplyr,
     shiny,
-    data.table
+    data.table,
+    utils
 Remotes:
     metrumresearchgroup/logrrr
 License: MIT + file LICENSE
