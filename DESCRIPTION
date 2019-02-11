@@ -18,7 +18,11 @@ Imports:
     httr,
     jsonlite,
     logrrr (>= 0.0.1),
-    glue
+    glue,
+    DT,
+    dplyr,
+    shiny,
+    data.table
 Remotes:
     metrumresearchgroup/logrrr
 License: MIT + file LICENSE

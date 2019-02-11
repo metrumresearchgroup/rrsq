@@ -1,6 +1,13 @@
+#' Function to format an object into a datetime.
+#' @param .x An object to convert to a datetime.
+#' @export
 to_datetime <- function(.x) {
   as.POSIXct(strptime(.x, format = "%Y-%m-%dT%H:%M%OS",tz = "UTC"))
 }
+
+#' convert a single job object into a dataframe.
+#' @param .j A single job object.
+#' @export
 job_to_df <- function(.j) {
   data.frame(
     id = .j$id,
@@ -33,7 +40,12 @@ jobs_to_df <- function(.jl){
     return(result)
 }
 
-# don't use purrr as requires dplyr for map_dfr
+#' don't use purrr as requires dplyr for map_dfr
+#' @param .x A list to iterate over.
+#' @param .f A function to apply to each element in the list.
+#' @param ... Additional arguments to be supplied to .f
+#' @export
+#' @importFrom data.table rbindlist
 map_dfr <- function(.x, .f, ...) {
   data.table::rbindlist(lapply(.x, .f, ...),
                         use.names = TRUE,
