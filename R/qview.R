@@ -1,3 +1,5 @@
+globalVariables(names = c("id", "user", "cancel_button"))
+
 ## Support Functions ####
 
 #' Function to get the user, or a mock user when the user isn't available.
@@ -66,10 +68,6 @@ queueView <- function(
   .refresh_interval = 3000
 ) {
 
-  id = NULL
-  user = NULL
-  cancel_button = NULL
-
   # Grab the namespace function used in the UI object.
   # We will need this for creating the individual buttons in the list.
   ns <- session$ns
@@ -79,10 +77,17 @@ queueView <- function(
   #   sort the contents by ID (descending). We then assign this to as a component of a
   #   reactiveValue for easy-access in other reactive contexts.
   .rv <- shiny::reactiveValues()
-  .rv$queue_data <-
-    jobs_to_df(queue_obj$get_jobs()) %>%
+  .rv$queue_data <- NULL
+
+
+  jobs_df <- jobs_to_df(queue_obj$get_jobs())
+  .rv$queue_data <- if(purrr::is_null(jobs_df)) {
+    # jobs_to_df(queue_obj$get_jobs()) %>%
+    NULL
+  } else {
     dplyr::filter(user == .user) %>%
     dplyr::arrange(dplyr::desc(id))
+  }
 
   .return_values <- shiny::reactiveValues()
 
@@ -175,22 +180,22 @@ queueView <- function(
 
 # ## Testing ####
 #
-# ui <- shiny::fluidPage(
-#   shiny::tableOutput("row"),
-#   queueViewOutput("made_up_id")
-#
-# )
-#
-# server <- function(input, output, session) {
-#   returns <- shiny::callModule(
-#     queueView,
-#     "made_up_id",
-#     queue_obj = rrsq::RSimpleQueue$new(),
-#     #.user = whoami(session = session, .mock_user = "Professor Pouch")
-#     .user = whoami(session = session, .mock_user = "Sheersa")
-#   )
-#
-#   output$row <- shiny::renderTable(returns$selected_row)
-# }
-#
-# shiny::shinyApp(ui = ui, server = server)
+ui <- shiny::fluidPage(
+  shiny::tableOutput("row"),
+  queueViewOutput("made_up_id")
+
+)
+
+server <- function(input, output, session) {
+  returns <- shiny::callModule(
+    queueView,
+    "made_up_id",
+    queue_obj = rrsq::RSimpleQueue$new(),
+    #.user = whoami(session = session, .mock_user = "Professor Pouch")
+    .user = whoami(session = session, .mock_user = "Sheersa")
+  )
+
+  output$row <- shiny::renderTable(returns$selected_row)
+}
+
+shiny::shinyApp(ui = ui, server = server)
