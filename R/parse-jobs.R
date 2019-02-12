@@ -26,8 +26,13 @@ job_to_df <- function(.j) {
 #' @details
 #' current drops some of the run details that shouldn't matter to the user
 #' such as the script execution location
+#' @importFrom purrr is_null
 #' @export
 jobs_to_df <- function(.jl){
+  if(purrr::is_null(.jl)) {
+    return(NULL)
+  }
+
   # only single job, lets convert it to a list so retains same list-like nature
   if ("id" %in% names(.jl)) {
     .jl <- list(.jl)

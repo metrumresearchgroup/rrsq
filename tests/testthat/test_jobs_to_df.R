@@ -4,7 +4,7 @@ library(rrsq)
 context("Test jobs_to_df and job_to_df functions")
 
 testthat::test_that(desc = "Dataframe is returned from job_to_df (singular)", {
-  jobs <- dget(file = file.path("test_data/job_list_four_items.txt"))
+  jobs <- dget(file = file.path("test_data/job_list_nine_items.txt"))
   job = jobs[[2]]
   tryCatch({
     result <- job_to_df(job)
@@ -16,7 +16,7 @@ testthat::test_that(desc = "Dataframe is returned from job_to_df (singular)", {
 
 
 testthat::test_that(desc = "Dataframe is returned from jobs_to_df", {
-  jobs <- dget(file = file.path("test_data/job_list_four_items.txt"))
+  jobs <- dget(file = file.path("test_data/job_list_nine_items.txt"))
 
   result <- tryCatch({
     jobs_to_df(jobs)
@@ -29,10 +29,8 @@ testthat::test_that(desc = "Dataframe is returned from jobs_to_df", {
 
 })
 
-testthat::test_that(desc = "Empty dataframe with columns is returned from jobs_to_df on when joblist is NULL", {
+testthat::test_that(desc = "Test jobs_to_df returns NULL after NULL argument", {
   result <- jobs_to_df(NULL)
-  testthat::expect_equal(object = nrow(result), expected = 0)
-  testthat::expect_equal(object = length(result), expected = 10)
-  testthat::expect_true(is.data.frame(result))
+  testthat::expect_null(result)
 })
 

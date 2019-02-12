@@ -1,3 +1,5 @@
+globalVariables(names = c("id", "user", "cancel_button"))
+
 ## Support Functions ####
 
 #' Function to get the user, or a mock user when the user isn't available.
@@ -32,6 +34,29 @@ cancel_button_creator <- function(index, .ns) {
   )
 }
 
+#' Function to grab a dataframe of the jobs in the queue for the given user.
+#' @param queue_obj The RSimpleQueue object currently in use.
+#' @param .user THe user as a character string -- only this user's jobs will be returned.
+#' @importFrom dplyr filter arrange desc
+#' @importFrom purrr is_null
+get_queue_data <- function(queue_obj, .user) {
+  return_value <- NULL
+
+  jobs_df <- jobs_to_df(
+    queue_obj$get_jobs()
+  )
+
+  if(!purrr::is_null(jobs_df)) {
+    filtered_df <-
+      dplyr::arrange(jobs_df, dplyr::desc(id)) %>%
+      dplyr::filter(user == .user)
+    if(nrow(filtered_df) > 0) {
+      return_value <- filtered_df
+    }
+  }
+  return(return_value)
+}
+
 ## UI ####
 
 #' queueViewOutput - Data Table displaying the jobs currently in an R Simple Queue.
@@ -54,8 +79,9 @@ queueViewOutput <- function(id) {
 #' @param .user The current user of the shiny application. Used for filtering which jobs are visible.
 #' @param queue_obj An RSimpleQueue object that has already been initialized with $new.
 #' @param .refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
-#' @importFrom dplyr filter arrange all_equal
+#' @importFrom dplyr all_equal
 #' @importFrom shiny reactiveValues invalidateLater
+#' @importFrom purrr is_null
 #' @export
 queueView <- function(
   input,
@@ -66,24 +92,19 @@ queueView <- function(
   .refresh_interval = 3000
 ) {
 
-  id = NULL
-  user = NULL
-  cancel_button = NULL
-
   # Grab the namespace function used in the UI object.
   # We will need this for creating the individual buttons in the list.
   ns <- session$ns
 
   # Initialize our data frame, "queue_data".
-  # We pull the source data with queue_obj$get_jobs, then convert it to a data frame and
-  #   sort the contents by ID (descending). We then assign this to as a component of a
+  # Pull the source data with a helper function, which converts it to a data frame and
+  #   sorts the contents by ID (descending). We then assign this to as a component of a
   #   reactiveValue for easy-access in other reactive contexts.
   .rv <- shiny::reactiveValues()
-  .rv$queue_data <-
-    jobs_to_df(queue_obj$get_jobs()) %>%
-    dplyr::filter(user == .user) %>%
-    dplyr::arrange(dplyr::desc(id))
+  .rv$queue_data <- get_queue_data(queue_obj, .user)
 
+  # Initialize our return values, which we will use later to feed results from the
+  #   module into the calling Shiny App.
   .return_values <- shiny::reactiveValues()
 
   # Create an observe event that re-runs (via invalidation) every 1000 milliseconds.
@@ -93,10 +114,7 @@ queueView <- function(
   #   checks for new data.
   shiny::observe({
     shiny::invalidateLater(.refresh_interval)
-    new_data <-
-      jobs_to_df(queue_obj$get_jobs()) %>%
-      dplyr::filter(user == .user) %>%
-      dplyr::arrange(dplyr::desc(id))
+    new_data <- get_queue_data(queue_obj, .user)
 
     if (
       !isTRUE(dplyr::all_equal(.rv$queue_data, new_data))
@@ -175,22 +193,22 @@ queueView <- function(
 
 # ## Testing ####
 #
-# ui <- shiny::fluidPage(
-#   shiny::tableOutput("row"),
-#   queueViewOutput("made_up_id")
-#
-# )
-#
-# server <- function(input, output, session) {
-#   returns <- shiny::callModule(
-#     queueView,
-#     "made_up_id",
-#     queue_obj = rrsq::RSimpleQueue$new(),
-#     #.user = whoami(session = session, .mock_user = "Professor Pouch")
-#     .user = whoami(session = session, .mock_user = "Sheersa")
-#   )
-#
-#   output$row <- shiny::renderTable(returns$selected_row)
-# }
-#
-# shiny::shinyApp(ui = ui, server = server)
+ui <- shiny::fluidPage(
+  shiny::tableOutput("row"),
+  queueViewOutput("made_up_id")
+
+)
+
+server <- function(input, output, session) {
+  returns <- shiny::callModule(
+    queueView,
+    "made_up_id",
+    queue_obj = rrsq::RSimpleQueue$new(),
+    #.user = whoami(session = session, .mock_user = "Professor Pouch")
+    .user = whoami(session = session, .mock_user = "Sheersa")
+  )
+
+  output$row <- shiny::renderTable(returns$selected_row)
+}
+
+shiny::shinyApp(ui = ui, server = server)
