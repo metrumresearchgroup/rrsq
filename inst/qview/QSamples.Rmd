@@ -1,0 +1,63 @@
+---
+title: "QSamples"
+author: "John Carlo Salter"
+date: "2/7/2019"
+output: html_document
+---
+
+```{r}
+library(rrsq)
+queue <- RSimpleQueue$new()
+```
+
+
+```{r}
+queue = rrsq::RSimpleQueue$new()
+jobject1 <- queue$submit_job(
+  user = "John Carlo",
+  context = "c1", # glue::glue("job{round(runif(1, 1000, 10000),0)}"),
+  work_dir = getwd(),
+  rscript_path = system.file("inst/qview/long_sample.R", package = "rrsq")
+)
+jobject2 <- queue$submit_job(
+  user = "Dreznel",
+  context = "c2", # glue::glue("job{round(runif(1, 1000, 10000),0)}"),
+  work_dir = getwd(),
+  rscript_path = system.file("inst/qview/long_sample.R", package = "rrsq")
+)
+jobject3 <- queue$submit_job(
+  user = "Professor Pouch",
+  context = "c3", # glue::glue("job{round(runif(1, 1000, 10000),0)}"),
+  work_dir = getwd(),
+  rscript_path = system.file("inst/qview/long_sample.R", package = "rrsq")
+)
+jobject4 <- queue$submit_job(
+  user = "Sheersa",
+  context = "c3", # glue::glue("job{round(runif(1, 1000, 10000),0)}"),
+  work_dir = getwd(),
+  rscript_path = system.file("inst/qview/long_sample.R", package = "rrsq")
+)
+```
+
+
+```{r}
+queue = rrsq::RSimpleQueue$new()
+jobject1 <- queue$submit_job(
+  user = "John Carlo",
+  context = "Longer1", # glue::glue("job{round(runif(1, 1000, 10000),0)}"),
+  work_dir = getwd(),
+  rscript_path = system.file("inst/qview/longer_sample.R", package = "rrsq")
+)
+jobject2 <- queue$submit_job(
+  user = "Dreznel",
+  context = "Longer2", # glue::glue("job{round(runif(1, 1000, 10000),0)}"),
+  work_dir = getwd(),
+  rscript_path = system.file("inst/qview/longer_sample.R", package = "rrsq")
+)
+jobject3 <- queue$submit_job(
+  user = "Professor Pouch",
+  context = "Longer3", # glue::glue("job{round(runif(1, 1000, 10000),0)}"),
+  work_dir = getwd(),
+  rscript_path = system.file("inst/qview/longer_sample.R", package = "rrsq")
+)
+```

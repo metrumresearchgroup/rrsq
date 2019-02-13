@@ -4,6 +4,7 @@
 #' @details
 #' .envs will naturally grab all R_<var> variables, such as R_LIBS_SITE
 #' to set
+#' @importFrom utils sessionInfo
 #' @export
 collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
   r_path <- file.path(R.home("bin"), "R")
