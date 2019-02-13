@@ -1,7 +1,7 @@
 Package: rrsq
 Type: Package
 Title: R interface to r simple queue (rsq)
-Version: 0.0.2
+Version: 0.0.2.9000
 Description: An R interface to r simple queue (rsq).
 Encoding: UTF-8
 LazyData: true
@@ -10,15 +10,20 @@ Authors@R:
            family = "Pastoor",
            role = c("aut", "cre"),
            email = "devin.pastoor@gmail.com")
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Imports: 
     R6,
     purrr,
-    dplyr,
     magrittr,
     httr,
     jsonlite,
-    logrrr (>= 0.0.1)
+    logrrr (>= 0.0.1),
+    glue,
+    DT,
+    dplyr,
+    shiny,
+    data.table,
+    utils
 Remotes:
     metrumresearchgroup/logrrr
 License: MIT + file LICENSE
