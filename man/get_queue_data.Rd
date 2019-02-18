@@ -9,7 +9,7 @@ get_queue_data(queue_obj, .user)
 \arguments{
 \item{queue_obj}{The RSimpleQueue object currently in use.}
 
-\item{.user}{THe user as a character string -- only this user's jobs will be returned.}
+\item{.user}{The user as a character string -- only this user's jobs will be returned.}
 }
 \description{
 Function to grab a dataframe of the jobs in the queue for the given user.

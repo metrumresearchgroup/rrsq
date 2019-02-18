@@ -34,7 +34,11 @@ cancel_button_creator <- function(index, .ns) {
   )
 }
 
-any_button_creator <- function(.button_id, .button_label, index, .ns) {
+#' Function to create special, user-defined buttons to be rendered in a Data Table.
+#' @param .button_id The ID to use for the button. Will not be namespaced to the module.
+#' @param .button_label The label to display on the button.
+#' @param index The index of the Data Table row that the button will be placed in.
+any_button_creator <- function(.button_id, .button_label, index) {
   return(
     as.character(
       shiny::actionButton(
@@ -166,7 +170,7 @@ queueView <- function(
           purrr::map_chr(
             seq_len(nrow(.rv$queue_data)),
             any_button_creator,
-            .ns = ns,
+            # index = .
             .button_id = .x,
             .button_label = .y
       )}) %>% purrr::set_names(button_labels)
@@ -180,8 +184,6 @@ queueView <- function(
     escape = FALSE,
     selection = "single"
   )
-
-
 
   # Create an eventReactive for when Cancel buttons are pushed.
   # This eventReactive triggers whenever a Cancel button is pushed. All Cancel buttons are

@@ -5,7 +5,7 @@
 \title{queueView - Server-side function to call with callModule()}
 \usage{
 queueView(input, output, session, .user, queue_obj = RSimpleQueue$new(),
-  .refresh_interval = 3000)
+  .refresh_interval = 3000, button_ids = NULL, button_labels = NULL)
 }
 \arguments{
 \item{input}{Shiny input}
