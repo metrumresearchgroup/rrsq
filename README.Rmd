@@ -57,13 +57,16 @@ server <- function(input, output, session) {
   button_ids = c("X_button", "A_button", "B_button", "C_button")
   button_labels = c("X", "A", "B", "C")
 
+  rrsq_object <- rrsq::RSimpleQueue$new()
+  user <- rrsq::whoami(session = session, .mock_user = "Dreznel")
+
   module_return_reactive_values <- shiny::callModule(
     rrsq::queueView,
     "any_id_you_want",
-    queue_obj = rrsq::RSimpleQueue$new(),
+    queue_obj = rrsq_object,
     button_ids = button_ids,
     button_labels = button_labels,
-    .user = rrsq::whoami(session = session, .mock_user = "Sheersa"),
+    .user = user,
     .refresh_interval = 3000
   )
 
