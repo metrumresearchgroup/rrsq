@@ -1,4 +1,4 @@
-globalVariables(names = c("id", "user", "cancel_button"))
+globalVariables(names = c("id", "user", "cancel_button", "."))
 
 ## Support Functions ####
 
@@ -96,6 +96,8 @@ queueViewOutput <- function(id) {
 #' @param user The current user of the shiny application. Used for filtering which jobs are visible.
 #' @param queue_obj An RSimpleQueue object that has already been initialized with $new.
 #' @param refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
+#' @param button_ids (Optional) A vector of Shiny ids (strings) to use for custom buttons added to the table.
+#' @param button_labels (Optional) A vector of Shiny labels (strings) to use for custom buttons added to the table. Must correspond to button_ids.
 #' @importFrom dplyr all_equal
 #' @importFrom shiny reactiveValues invalidateLater
 #' @importFrom purrr is_null
