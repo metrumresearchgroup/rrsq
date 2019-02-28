@@ -129,7 +129,7 @@ queueView <- function(
     .return_values$rows <- .rv$queue_data
   )
 
-  # Create an observe event that re-runs (via invalidation) every 1000 milliseconds.
+  # Create an observe event that re-runs (via invalidation) every <.refresh_interval> milliseconds.
   # In this section, we grab an updated version of our data frame and compare it
   #   to the one currently in use. If any differences are found, we upate the data
   #   frame in use. This prevents the UI from constantly refreshing every time it
@@ -215,7 +215,7 @@ queueView <- function(
   shiny::observe({
     index <- selected_index()
     if(is.numeric(index)) {
-      .return_values$highlighted_rows <- .rv$queue_data %>% dplyr::slice(index)
+      .return_values$highlighted_row <- .rv$queue_data %>% dplyr::slice(index)
     }
   })
 
