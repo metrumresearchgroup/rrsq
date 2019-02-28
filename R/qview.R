@@ -93,9 +93,9 @@ queueViewOutput <- function(id) {
 #' @param input Shiny input
 #' @param output Shiny output
 #' @param session Shiny session
-#' @param .user The current user of the shiny application. Used for filtering which jobs are visible.
+#' @param user The current user of the shiny application. Used for filtering which jobs are visible.
 #' @param queue_obj An RSimpleQueue object that has already been initialized with $new.
-#' @param .refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
+#' @param refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
 #' @importFrom dplyr all_equal
 #' @importFrom shiny reactiveValues invalidateLater
 #' @importFrom purrr is_null
@@ -104,9 +104,9 @@ queueView <- function(
   input,
   output,
   session,
-  .user,
+  user,
   queue_obj = RSimpleQueue$new(),
-  .refresh_interval = 3000,
+  refresh_interval = 3000,
   button_ids = NULL,
   button_labels = NULL
 ) {
@@ -120,7 +120,7 @@ queueView <- function(
   #   sorts the contents by ID (descending). We then assign this to as a component of a
   #   reactiveValue for easy-access in other reactive contexts.
   .rv <- shiny::reactiveValues()
-  .rv$queue_data <- get_queue_data(queue_obj, .user)
+  .rv$queue_data <- get_queue_data(queue_obj, user)
 
   # Initialize our return values, which we will use later to feed results from the
   #   module into the calling Shiny App.
@@ -129,14 +129,14 @@ queueView <- function(
     .return_values$rows <- .rv$queue_data
   )
 
-  # Create an observe event that re-runs (via invalidation) every <.refresh_interval> milliseconds.
+  # Create an observe event that re-runs (via invalidation) every <refresh_interval> milliseconds.
   # In this section, we grab an updated version of our data frame and compare it
   #   to the one currently in use. If any differences are found, we upate the data
   #   frame in use. This prevents the UI from constantly refreshing every time it
   #   checks for new data.
   shiny::observe({
-    shiny::invalidateLater(.refresh_interval)
-    new_data <- get_queue_data(queue_obj, .user)
+    shiny::invalidateLater(refresh_interval)
+    new_data <- get_queue_data(queue_obj, user)
 
     if (
       !isTRUE(dplyr::all_equal(.rv$queue_data, new_data))
