@@ -1,4 +1,4 @@
-globalVariables(names = c("id", "user", "cancel_button"))
+globalVariables(names = c("id", "user", "cancel_button", "."))
 
 ## Support Functions ####
 
@@ -28,7 +28,24 @@ cancel_button_creator <- function(index, .ns) {
         glue::glue("cancel_button_{as.character(index)}"),
         glue::glue("Cancel"),
         row_index = index,
-        onclick = paste0('Shiny.onInputChange(\"', .ns("cancel_button"), '\",  this.attributes.row_index.value)')
+        onclick = paste0('Shiny.onInputChange(\"', .ns("cancel_button"), '\",  this.attributes.row_index.value)') ## When clicked, set input$cancel_button equal to the index. This is a detectable change.
+      )
+    )
+  )
+}
+
+#' Function to create special, user-defined buttons to be rendered in a Data Table.
+#' @param .button_id The ID to use for the button. Will not be namespaced to the module.
+#' @param .button_label The label to display on the button.
+#' @param index The index of the Data Table row that the button will be placed in.
+any_button_creator <- function(.button_id, .button_label, index) {
+  return(
+    as.character(
+      shiny::actionButton(
+        glue::glue("{.button_id}_index_{as.character(index)}"),
+        glue::glue("{.button_label}"),
+        row_index = index,
+        onclick = glue::glue('Shiny.onInputChange(\"{.button_id}\", this.attributes.row_index.value)') # Don't use .ns with button_id here because button_id is defined in the calling application. #input$
       )
     )
   )
@@ -36,7 +53,7 @@ cancel_button_creator <- function(index, .ns) {
 
 #' Function to grab a dataframe of the jobs in the queue for the given user.
 #' @param queue_obj The RSimpleQueue object currently in use.
-#' @param .user THe user as a character string -- only this user's jobs will be returned.
+#' @param .user The user as a character string -- only this user's jobs will be returned.
 #' @importFrom dplyr filter arrange desc
 #' @importFrom purrr is_null
 get_queue_data <- function(queue_obj, .user) {
@@ -76,9 +93,11 @@ queueViewOutput <- function(id) {
 #' @param input Shiny input
 #' @param output Shiny output
 #' @param session Shiny session
-#' @param .user The current user of the shiny application. Used for filtering which jobs are visible.
+#' @param user The current user of the shiny application. Used for filtering which jobs are visible.
 #' @param queue_obj An RSimpleQueue object that has already been initialized with $new.
-#' @param .refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
+#' @param refresh_interval The frequency with which the UI should poll the queue and update, in milliseconds.
+#' @param button_ids (Optional) A vector of Shiny ids (strings) to use for custom buttons added to the table.
+#' @param button_labels (Optional) A vector of Shiny labels (strings) to use for custom buttons added to the table. Must correspond to button_ids.
 #' @importFrom dplyr all_equal
 #' @importFrom shiny reactiveValues invalidateLater
 #' @importFrom purrr is_null
@@ -87,9 +106,11 @@ queueView <- function(
   input,
   output,
   session,
-  .user,
+  user,
   queue_obj = RSimpleQueue$new(),
-  .refresh_interval = 3000
+  refresh_interval = 3000,
+  button_ids = NULL,
+  button_labels = NULL
 ) {
 
   # Grab the namespace function used in the UI object.
@@ -101,20 +122,23 @@ queueView <- function(
   #   sorts the contents by ID (descending). We then assign this to as a component of a
   #   reactiveValue for easy-access in other reactive contexts.
   .rv <- shiny::reactiveValues()
-  .rv$queue_data <- get_queue_data(queue_obj, .user)
+  .rv$queue_data <- get_queue_data(queue_obj, user)
 
   # Initialize our return values, which we will use later to feed results from the
   #   module into the calling Shiny App.
   .return_values <- shiny::reactiveValues()
+  shiny::observe(
+    .return_values$rows <- .rv$queue_data
+  )
 
-  # Create an observe event that re-runs (via invalidation) every 1000 milliseconds.
+  # Create an observe event that re-runs (via invalidation) every <refresh_interval> milliseconds.
   # In this section, we grab an updated version of our data frame and compare it
   #   to the one currently in use. If any differences are found, we upate the data
   #   frame in use. This prevents the UI from constantly refreshing every time it
   #   checks for new data.
   shiny::observe({
-    shiny::invalidateLater(.refresh_interval)
-    new_data <- get_queue_data(queue_obj, .user)
+    shiny::invalidateLater(refresh_interval)
+    new_data <- get_queue_data(queue_obj, user)
 
     if (
       !isTRUE(dplyr::all_equal(.rv$queue_data, new_data))
@@ -135,26 +159,37 @@ queueView <- function(
         shiny::need(nrow(.rv$queue_data) > 0, "There are no jobs in the queue for the current user.")
       )
 
+      # cancel_button_creator <- function(index, .ns) {
       cancel_button_column <- purrr::map_chr(
         seq_len(nrow(.rv$queue_data)),
         cancel_button_creator,
         .ns = ns
       )
 
+      #any_button_creator <- function(.button_id, .button_label, index, .ns) {
+      other_button_columns <-
+        purrr::map2(button_ids, button_labels, .f = function(.x, .y) {
+          purrr::map_chr(
+            seq_len(nrow(.rv$queue_data)),
+            any_button_creator,
+            # index = .
+            .button_id = .x,
+            .button_label = .y
+      )}) %>% purrr::set_names(button_labels)
+
       .rv$queue_data %>%
         dplyr::mutate(cancel_button = cancel_button_column) %>%
-        dplyr::select(cancel_button, dplyr::everything())
+        dplyr::select(cancel_button, dplyr::everything()) %>%
+        dplyr::bind_cols(other_button_columns, .)
 
     },
     escape = FALSE,
     selection = "single"
   )
 
-
-
   # Create an eventReactive for when Cancel buttons are pushed.
   # This eventReactive triggers whenever a Cancel button is pushed. All Cancel buttons are
-  #   treated as as if they had the id ns("cancel_button") (this is set up in
+  #   treated as as if they had the id cancel_button (this is set up in
   #   cancel_button_creator). It saves the index of the row where the button was clicked.
   cancel_index <- shiny::eventReactive(input$cancel_button, {
     return(input$cancel_button)
@@ -182,7 +217,7 @@ queueView <- function(
   shiny::observe({
     index <- selected_index()
     if(is.numeric(index)) {
-      .return_values$selected_row <- .rv$queue_data %>% dplyr::slice(index)
+      .return_values$highlighted_row <- .rv$queue_data %>% dplyr::slice(index)
     }
   })
 
@@ -190,25 +225,3 @@ queueView <- function(
   return(.return_values)
 }
 
-
-# ## Testing ####
-#
-ui <- shiny::fluidPage(
-  shiny::tableOutput("row"),
-  queueViewOutput("made_up_id")
-
-)
-
-server <- function(input, output, session) {
-  returns <- shiny::callModule(
-    queueView,
-    "made_up_id",
-    queue_obj = rrsq::RSimpleQueue$new(),
-    #.user = whoami(session = session, .mock_user = "Professor Pouch")
-    .user = whoami(session = session, .mock_user = "Sheersa")
-  )
-
-  output$row <- shiny::renderTable(returns$selected_row)
-}
-
-shiny::shinyApp(ui = ui, server = server)

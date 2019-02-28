@@ -4,8 +4,8 @@
 \alias{queueView}
 \title{queueView - Server-side function to call with callModule()}
 \usage{
-queueView(input, output, session, .user, queue_obj = RSimpleQueue$new(),
-  .refresh_interval = 3000)
+queueView(input, output, session, user, queue_obj = RSimpleQueue$new(),
+  refresh_interval = 3000, button_ids = NULL, button_labels = NULL)
 }
 \arguments{
 \item{input}{Shiny input}
@@ -14,11 +14,15 @@ queueView(input, output, session, .user, queue_obj = RSimpleQueue$new(),
 
 \item{session}{Shiny session}
 
-\item{.user}{The current user of the shiny application. Used for filtering which jobs are visible.}
+\item{user}{The current user of the shiny application. Used for filtering which jobs are visible.}
 
 \item{queue_obj}{An RSimpleQueue object that has already been initialized with $new.}
 
-\item{.refresh_interval}{The frequency with which the UI should poll the queue and update, in milliseconds.}
+\item{refresh_interval}{The frequency with which the UI should poll the queue and update, in milliseconds.}
+
+\item{button_ids}{(Optional) A vector of Shiny ids (strings) to use for custom buttons added to the table.}
+
+\item{button_labels}{(Optional) A vector of Shiny labels (strings) to use for custom buttons added to the table. Must correspond to button_ids.}
 }
 \description{
 queueView - Server-side function to call with callModule()
