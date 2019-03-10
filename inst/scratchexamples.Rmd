@@ -1,0 +1,60 @@
+---
+title: "examples"
+output: html_document
+---
+
+
+```{r}
+library(rrsq)
+```
+
+```{r}
+rsq <- RSimpleQueue$new()
+```
+
+
+```{r}
+j1 <- rsq$submit_job(
+  user = "devin",
+  context = "env", 
+  work_dir = getwd(),
+  rscript_path = "test_env.R"
+)
+```
+
+```{r}
+rsq$get_job(j1$id)
+```
+
+Should still not get the value as not explicity set
+
+```{r}
+withr::with_envvar(c("RRSQTEST1" = "test1"), {
+  cat(Sys.getenv("RRSQTEST1"))
+  j2 <- rsq$submit_job(
+  user = "devin",
+  context = "env", 
+  work_dir = getwd(),
+  rscript_path = "test_env.R"
+  )
+})
+Sys.sleep(1)
+rsq$get_job(j2$id)$result$output
+```
+
+```{r}
+withr::with_envvar(c("RRSQTEST1" = "test1"), {
+  cat(Sys.getenv("RRSQTEST1"))
+  j3 <- rsq$submit_job(
+  user = "devin",
+  context = "env", 
+  work_dir = getwd(),
+  rscript_path = "test_env.R",
+  .envs = "RRSQTEST1"
+  )
+})
+Sys.sleep(1)
+rsq$get_job(j3$id)$result$output
+```
+
+
