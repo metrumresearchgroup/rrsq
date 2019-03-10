@@ -5,7 +5,7 @@
 #' the resulting environment variables will always have R_LIBS_SITE,
 #' R_LIBS_USER, and R_LIBS set to the .libPaths() to forceably make
 #' sure that the remote session will leverage the same libpaths
-#' @importFrom utils sessionInfo
+#' @importFrom utils sessionInfo modifyList
 #' @return list with r_path, renv (list with set environment variables), work_dir
 #' @export
 collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
