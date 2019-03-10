@@ -50,8 +50,8 @@ describe("submitting jobs to real queue", {
         rscript_path = "test_scripts/test_env.R"
       )
     })
-    expect_equal(j1$status, "QUEUED")
-    expect_false("RRSQTEST1" %in% names(j1$rscript$renv))
+    expect_equal(j2$status, "QUEUED")
+    expect_false("RRSQTEST1" %in% names(j2$rscript$renv))
 
     # will take at least 150 ms or so to start up R and run the external script
     Sys.sleep(0.25)
