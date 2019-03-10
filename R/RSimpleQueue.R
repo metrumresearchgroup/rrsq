@@ -101,7 +101,7 @@ RSimpleQueue <-
                                       rscript_path,
                                       work_dir = NULL,
                                       r_path = NULL,
-                                      renv = NULL,
+                                      .envs = NULL,
                                       .no_submit = FALSE,
                                       .parse = TRUE
                 )  {
@@ -112,7 +112,7 @@ RSimpleQueue <-
                     rscript_path = rscript_path,
                     work_dir = work_dir,
                     r_path = r_path,
-                    renv = renv,
+                    .envs = .envs,
                     .no_submit = .no_submit
                   )
                   output <- if (.parse && !.no_submit) {
