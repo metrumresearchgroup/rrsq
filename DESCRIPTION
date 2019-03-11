@@ -29,3 +29,5 @@ Remotes:
 License: MIT + file LICENSE
 Suggests: 
     testthat
+    mockery
+
