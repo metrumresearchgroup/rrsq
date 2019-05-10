@@ -2,16 +2,24 @@
 #' @param .envs environment variables to retain
 #' @param .pkgs packages to load in new session, if null defaults to all loaded in current session
 #' @details
-#' .envs will naturally grab all R_<var> variables, such as R_LIBS_SITE
-#' to set
-#' @importFrom utils sessionInfo
+#' the resulting environment variables will always have R_LIBS_SITE,
+#' R_LIBS_USER, and R_LIBS set to the .libPaths() to forceably make
+#' sure that the remote session will leverage the same libpaths
+#' @importFrom utils sessionInfo modifyList
+#' @return list with r_path, renv (list with set environment variables), work_dir
 #' @export
 collect_r_details <- function(.envs = NULL, .pkgs = NULL) {
   r_path <- file.path(R.home("bin"), "R")
   envs <- Sys.getenv()
-  renvs <- as.list(envs[grepl(pattern = "^R_.*", names(envs))])
+  lib_paths <- paste0(.libPaths(), collapse = ":")
+  renvs <- list(
+    R_LIBS_SITE = lib_paths,
+    R_LIBS_USER = lib_paths,
+    R_LIBS = lib_paths
+  )
   if (!is.null(.envs)) {
-    renvs <- unique(c(renvs, envs[which(names(envs) %in% .envs)]))
+    .envs <- .envs[!(.envs %in% c("R_LIBS_SITE", "R_LIBS_USER", "R_LIBS"))]
+    renvs <- modifyList(renvs, as.list(envs[which(names(envs) %in% .envs)]))
   }
   loaded_pkgs <- if (is.null(.pkgs)) {
     session <- sessionInfo()

@@ -38,6 +38,33 @@ queue$get_jobs()
 queue$cancel_job(jobject1$id) 
 ```
 
+## Environment variables
+
+Secrets or other information set as environment variables can be passed via the `.envs` arg for the `submit_job` method.
+
+```r
+rsq$submit_job(
+        ...,
+        .envs = c("<example_env_name>")
+      )
+```
+
+On your machine setting environment variables to secret values, or if they are set in the Renviron can be captured
+by name and passed to the execution context
+
+```
+jobject1 <- queue$submit_job(
+  user = "devin",
+  context = "super secret job",
+  work_dir = getwd(),
+  rscript_path = "script_with_secrets.R",
+  .envs = c("ENV_SECRET", "ANOTHER_SECRET"))
+)
+```
+
+In the above example, the environment variables `ENV_SECRET` and `ANOTHER_SECRET` will also be set to the same values in the queue.
+
+## Shiny module
 
 Additionally, RRSQ includes a Shiny module to easily create a viewable list of each job in the queue for the current user.
 
@@ -93,14 +120,6 @@ shiny::shinyApp(ui = ui, server = server)
 
 ```
 
-
-
-JSON can be used as an interchange format
-
-```{r}
-library(rrsq)
-jsonlite::toJSON(unbox_details(collect_r_details()), pretty =TRUE)
-```
 
 [rsq]: https://github.com/metrumresearchgroup/rsq
 

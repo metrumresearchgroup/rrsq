@@ -5,7 +5,7 @@
 \title{submit job}
 \usage{
 .submit_job(srvr, user, context, rscript_path, work_dir = NULL,
-  r_path = NULL, renv = NULL, .no_submit = FALSE)
+  r_path = NULL, .envs = NULL, .no_submit = FALSE)
 }
 \arguments{
 \item{srvr}{rsq server url}
@@ -20,7 +20,7 @@
 
 \item{r_path}{path to R executable}
 
-\item{renv}{list of environment variables}
+\item{.envs}{vector of env variables}
 
 \item{.no_submit}{return json that would be submitted but don't make request}
 }

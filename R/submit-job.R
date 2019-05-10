@@ -5,7 +5,7 @@
 #' @param rscript_path path to rscript
 #' @param work_dir directory to start R from
 #' @param r_path path to R executable
-#' @param renv list of environment variables
+#' @param .envs vector of env variables
 #' @param .no_submit return json that would be submitted but don't make request
 #' @export
 .submit_job <- function(srvr,
@@ -14,18 +14,15 @@
                         rscript_path,
                         work_dir = NULL,
                         r_path = NULL,
-                        renv = NULL,
+                        .envs = NULL,
                         .no_submit = FALSE
 ) {
-  r_details <- unbox_details(collect_r_details())
+  r_details <- unbox_details(collect_r_details(.envs = .envs))
   if (!is.null(work_dir)) {
     r_details$work_dir <- work_dir
   }
   if (!is.null(r_path)) {
     r_details$r_path <- r_path
-  }
-  if (!is.null(renv)) {
-    r_details$renv <- renv
   }
   submission_values <- list(
       "id"= jsonlite::unbox(0),

@@ -11,10 +11,14 @@ collect_r_details(.envs = NULL, .pkgs = NULL)
 
 \item{.pkgs}{packages to load in new session, if null defaults to all loaded in current session}
 }
+\value{
+list with r_path, renv (list with set environment variables), work_dir
+}
 \description{
 Information about running R
 }
 \details{
-.envs will naturally grab all R_<var> variables, such as R_LIBS_SITE
-to set
+the resulting environment variables will always have R_LIBS_SITE,
+R_LIBS_USER, and R_LIBS set to the .libPaths() to forceably make
+sure that the remote session will leverage the same libpaths
 }
