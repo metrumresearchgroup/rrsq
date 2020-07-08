@@ -140,11 +140,12 @@ queueView <- function(
     shiny::invalidateLater(refresh_interval)
     new_data <- get_queue_data(queue_obj, user)
 
-    if (
-      !isTRUE(dplyr::all_equal(.rv$queue_data, new_data))
-    ) {
+    if(purrr::is_null(.rv$queue_data) || purrr::is_null(new_data)) {
+      .rv$queue_data <- new_data
+    } else if (!isTRUE(dplyr::all_equal(.rv$queue_data, new_data))) {
       .rv$queue_data <- new_data
     }
+
   })
 
   # Create the DataTable (DT) object to be rendered.

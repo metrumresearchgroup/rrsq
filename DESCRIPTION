@@ -1,7 +1,7 @@
 Package: rrsq
 Type: Package
 Title: R interface to r simple queue (rsq)
-Version: 0.2.0
+Version: 0.2.1
 Description: An R interface to r simple queue (rsq).
 Encoding: UTF-8
 LazyData: true
@@ -10,7 +10,7 @@ Authors@R:
            family = "Pastoor",
            role = c("aut", "cre"),
            email = "devin.pastoor@gmail.com")
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 Imports: 
     R6,
     purrr,

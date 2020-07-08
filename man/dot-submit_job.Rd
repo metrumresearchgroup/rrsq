@@ -4,8 +4,16 @@
 \alias{.submit_job}
 \title{submit job}
 \usage{
-.submit_job(srvr, user, context, rscript_path, work_dir = NULL,
-  r_path = NULL, renv = NULL, .no_submit = FALSE)
+.submit_job(
+  srvr,
+  user,
+  context,
+  rscript_path,
+  work_dir = NULL,
+  r_path = NULL,
+  renv = NULL,
+  .no_submit = FALSE
+)
 }
 \arguments{
 \item{srvr}{rsq server url}
