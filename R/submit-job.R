@@ -39,7 +39,7 @@
         "renv"= r_details$renv
       )
   )
-  submission_json <- jsonlite::toJSON(submission_values)
+  submission_json <- jsonlite::toJSON(submission_values, auto_unbox = T)
   if (.no_submit) {
     return(submission_json)
   }
