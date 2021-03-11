@@ -28,4 +28,5 @@ Remotes:
     metrumresearchgroup/logrrr
 License: MIT + file LICENSE
 Suggests: 
-    testthat
+    testthat,
+    mockery
