@@ -1,25 +1,32 @@
 Version: 1
 
+Descriptions:
+  - ./DESCRIPTION
+
 Packages:
-  - logrrr
-  - R6
-  - purrr
-  - magrittr
-  - httr
-  - jsonlite
-  - logrrr
-  - glue
-  - DT
-  - dplyr
-  - shiny
-  - data.table
-  - utils
-  - roxygen2
+  - devtools
+
+# Packages:
+  # - logrrr
+  # - R6
+  # - purrr
+  # - magrittr
+  # - httr
+  # - jsonlite
+  # - logrrr
+  # - glue
+  # - DT
+  # - dplyr
+  # - shiny
+  # - data.table
+  # - utils
+  # - roxygen2
 
 Repos:
-  - MPN: "https://mpn.metworx.com/snapshots/stable/2020-06-08"
+  - MPN: "https://mpn.metworx.com/snapshots/stable/2021-06-20"
   - CRAN: "https://cran.rstudio.com"
 
-Library: "/Library/Frameworks/R.framework/Versions/3.6/Resources/library"
+Lockfile:
+  Type: renv
 
 

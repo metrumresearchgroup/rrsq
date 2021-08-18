@@ -5,8 +5,26 @@
 \alias{RSimpleQueue}
 \title{Create a new rsq server manager}
 \description{
+Create a new rsq server manager
+
+Create a new rsq server manager
+}
+\details{
 The Babylon generator creates a new 'Babylon'-object, which contains logic to interact
 with a running bbq server from the babylon ecosystem.
+
+
+`version` is stored as a private variable on the RSQ object after being retrieved from the RSQ endpoint.
+Subsequent calls to this method return this private variable, rather than the value returned by RSQ.
+
+
+RSQ jobs are executed by pointing RSQ at an RScript living on the filesystem and providing
+some extra parameters around the executing R Session, such as working directory and environment
+variables.
+
+Note that all RSQ jobs are run on the server executing RSQ. Therefore, the RScript to run
+must exist on the same server, and any paths or configurations must be constructed relative
+to the RSQ-executing server.
 }
 \section{Initialization}{
 
@@ -66,7 +84,9 @@ rsq$get_jobs(status = "COMPLETED") \%>\% map_chr(~ .x$Result$Output)
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Constructor for an RSQ object, which can be used to query a running RSQ instance.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$new(
   init = NULL,
@@ -78,18 +98,47 @@ rsq$get_jobs(status = "COMPLETED") \%>\% map_chr(~ .x$Result$Output)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{init}}{not used}
+
+\item{\code{host}}{the host URL of the running RSQ service}
+
+\item{\code{port}}{the}
+
+\item{\code{port}}{the port of the running RSQ service}
+
+\item{\code{verbose}}{not used}
+
+\item{\code{must_work}}{boolean, if TRUE, will try to ping the given host:port and will throw an error if the server isn't responding.}
+
+\item{\code{lgr}}{an optional logrrr::Logrrr object to be used with the RSQ object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+an RSQ object, which can be used to query a running RSQ instance
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ping"></a>}}
+\if{latex}{\out{\hypertarget{method-ping}{}}}
 \subsection{Method \code{ping()}}{
+Utility method to ensure that an RSQ endpoint can be reached by pinging it.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$ping()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+TRUE if the address is responsive, FALSE otherwise.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_version"></a>}}
+\if{latex}{\out{\hypertarget{method-get_version}{}}}
 \subsection{Method \code{get_version()}}{
+Returns the version of the running RSQ executable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$get_version()}\if{html}{\out{</div>}}
 }
@@ -97,7 +146,9 @@ rsq$get_jobs(status = "COMPLETED") \%>\% map_chr(~ .x$Result$Output)
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-submit_job"></a>}}
+\if{latex}{\out{\hypertarget{method-submit_job}{}}}
 \subsection{Method \code{submit_job()}}{
+Method to submit a job to RSQ.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$submit_job(
   user,
@@ -111,10 +162,40 @@ rsq$get_jobs(status = "COMPLETED") \%>\% map_chr(~ .x$Result$Output)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{user}}{the username of the person submitting the job.}
+
+\item{\code{context}}{a string providing some context for the job. This is open-ended and can be used
+later to help identify which job is which.}
+
+\item{\code{rscript_path}}{the path to the <script>.R file to be executed.}
+
+\item{\code{work_dir}}{the directory in which to execute the R script. Note that .Rprofiles from that directory
+will be applied as normal during R script execution.}
+
+\item{\code{r_path}}{the path to the R executable to use. Will default to the system's default R installation.}
+
+\item{\code{renv}}{a list of environment variables to be set in the R session.}
+
+\item{\code{.no_submit}}{a boolean value. If TRUE, this function will return the JSON of the RSQ submit-job request,
+but will not actually submit the request. Default is FALSE.}
+
+\item{\code{.parse}}{a boolean value. If TRUE (default), this method will return the JSON response of the RSQ
+service as an R list. If FALSE, this method will return the RSQ response as raw JSON.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+An R object (list) or a json string, depending on the value of `.parse`, with details for the submitted job.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_jobs"></a>}}
+\if{latex}{\out{\hypertarget{method-get_jobs}{}}}
 \subsection{Method \code{get_jobs()}}{
+Method to get details about all available jobs
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$get_jobs(
   status = NULL,
@@ -123,25 +204,72 @@ rsq$get_jobs(status = "COMPLETED") \%>\% map_chr(~ .x$Result$Output)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{status}}{an optional job status to filter results on. Options are "QUEUED", "RUNNING", "COMPLETED", and "ERROR"}
+
+\item{\code{STATUSES}}{not intended for use by end-users.}
+
+\item{\code{parse}}{a boolean value. If TRUE (default), this method will return the JSON response of the RSQ
+service as an R list. If FALSE, this function will return the RSQ response as raw JSON.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+An R object (list) or a json string, depending on the value of `parse`, containing the details for all jobs with
+the given status (or simply all jobs if status is NULL.)
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_job"></a>}}
+\if{latex}{\out{\hypertarget{method-get_job}{}}}
 \subsection{Method \code{get_job()}}{
+Method to return the details for a single job. Requires the job ID.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$get_job(id, parse = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{the numeric ID of the job to be acquired.}
+
+\item{\code{parse}}{a boolean value. If TRUE (default), this method will return the JSON response of the RSQ
+service as an R list. If FALSE, this function will return the RSQ response as raw JSON.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+An R object (list) or a json string, depending on the value of `parse`, containing the details for the requested job.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cancel_job"></a>}}
+\if{latex}{\out{\hypertarget{method-cancel_job}{}}}
 \subsection{Method \code{cancel_job()}}{
+Method to cancel a job with the given ID.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$cancel_job(id, parse = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{the numeric ID of the job to be canceled.}
+
+\item{\code{parse}}{a boolean value. If TRUE (default), this method will return the JSON response of the RSQ
+service as an R list. If FALSE, this function will return the RSQ response as raw JSON.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+An R object (list) or a json string, depending on the value of `parse`, with the response from the RSQ service.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
