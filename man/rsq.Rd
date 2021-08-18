@@ -51,4 +51,109 @@ bbq$poll(1:5) # poll for models 1-5 to complete
 rsq$get_jobs(status = "COMPLETED") \%>\% map_chr(~ .x$Result$Output)
 }
 }
-\keyword{datasets}
+\section{Methods}{
+\subsection{Public methods}{
+\itemize{
+\item \href{#method-new}{\code{RSimpleQueue$new()}}
+\item \href{#method-ping}{\code{RSimpleQueue$ping()}}
+\item \href{#method-get_version}{\code{RSimpleQueue$get_version()}}
+\item \href{#method-submit_job}{\code{RSimpleQueue$submit_job()}}
+\item \href{#method-get_jobs}{\code{RSimpleQueue$get_jobs()}}
+\item \href{#method-get_job}{\code{RSimpleQueue$get_job()}}
+\item \href{#method-cancel_job}{\code{RSimpleQueue$cancel_job()}}
+\item \href{#method-clone}{\code{RSimpleQueue$clone()}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-new"></a>}}
+\subsection{Method \code{new()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$new(
+  init = NULL,
+  host = "http://localhost",
+  port = 8950,
+  verbose = TRUE,
+  must_work = TRUE,
+  lgr = NULL
+)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ping"></a>}}
+\subsection{Method \code{ping()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$ping()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_version"></a>}}
+\subsection{Method \code{get_version()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$get_version()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-submit_job"></a>}}
+\subsection{Method \code{submit_job()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$submit_job(
+  user,
+  context,
+  rscript_path,
+  work_dir = NULL,
+  r_path = NULL,
+  renv = NULL,
+  .no_submit = FALSE,
+  .parse = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_jobs"></a>}}
+\subsection{Method \code{get_jobs()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$get_jobs(
+  status = NULL,
+  STATUSES = c("QUEUED", "RUNNING", "COMPLETED", "ERROR"),
+  parse = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_job"></a>}}
+\subsection{Method \code{get_job()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$get_job(id, parse = TRUE)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cancel_job"></a>}}
+\subsection{Method \code{cancel_job()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$cancel_job(id, parse = TRUE)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-clone"></a>}}
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RSimpleQueue$clone(deep = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
+}
+}
