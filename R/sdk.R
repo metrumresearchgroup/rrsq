@@ -1,9 +1,12 @@
+#TODO: break into smaller files.
+
 # plumbing # ----
 
 # Starting out by modeling this roughly on the Bridge API SDK.
 # This is very redundant, but let's see where this goes.
 
 #TODO: add option checking?
+
 
 #' CONSTANTS
 #'
@@ -218,6 +221,11 @@ api_get <- function(
   return(extract_json(resp))
 }
 
+#' submit a POST request to the RSQ API
+#' @param endpoint_url the full API URL for the endpoint to receive the GET request
+#' @param body a list object that will be converted into a JSON body and attached to the REST query.
+#' @param ... query parameters sent with the API request.
+#' @return the response content from the API.
 api_post <- function(
   endpoint_url,
   body,
