@@ -20,3 +20,28 @@ ac <- create_api_config()
 will_fail <- get_jobs(ac, statuses = "INVALID_STATUS")
 ```
 
+```{r}
+ac <- create_api_config()
+j1 <- get_job(
+  ac,
+  1
+)
+j1
+
+j1again <- get_job(ac, j1, return_df = TRUE)
+j1again
+```
+```{r}
+ac <- create_api_config()
+submitted_job <- submit_job2(
+  api_config = ac,
+  user = "johncarlos",
+  context = "test job",
+  rscript_path = "/Users/johncarlos/openspace/rrsq/hello.R",
+  work_dir = "/Users/johncarlos/openspace/rrsq"
+)
+get_job(ac, submitted_job, return_df = T)
+Sys.sleep(3)
+get_job(ac, submitted_job, return_df = T)
+```
+
