@@ -1,0 +1,22 @@
+```{r}
+ac <- create_api_config()
+a <- get_jobs(ac)
+b <- get_jobs(ac, users = "Dreznel")
+c <- get_jobs(ac, users = c("Dreznel", "John Carlo"))
+d <- get_jobs(ac, statuses = "ERROR")
+e <- get_jobs(ac, statuses = c("COMPLETED","ERROR"))
+f <- get_jobs(ac, statuses = c("COMPLETED"))
+
+a
+b
+c
+d
+e
+f
+```
+
+```{r}
+ac <- create_api_config()
+will_fail <- get_jobs(ac, statuses = "INVALID_STATUS")
+```
+

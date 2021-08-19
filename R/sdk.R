@@ -9,7 +9,7 @@
 #'
 #' Helper object to store constants such as endpoint addresses and such.
 CONSTANTS <- list(
-  ENDPOINTS <- list(
+  ENDPOINTS = list(
     JOB = "job",
     JOBS = "jobs",
     VERSION = "version",
@@ -19,6 +19,15 @@ CONSTANTS <- list(
   ERRORS = list(
     UNAUTHORIZED = "rsq_unauthorized",
     SERVER = "rsq_server_error"
+  ),
+  CLASSES = list(
+    API_CONFIG = "rsq_api_config"
+  ),
+  JOB_STATUS = list(
+    QUEUED = "QUEUED",
+    RUNNING = "RUNNING",
+    COMPLETED = "COMPLETED",
+    ERROR = "ERROR"
   )
 )
 
@@ -76,20 +85,52 @@ set_default_env_vars <- function() {
 }
 
 
+# #' get_endpoint_url_direct
+# #'
+# #' function to get the usable URL to an endpoint
+# #'
+# #' @param endpoint the endpoint to hit (string). Should not include leading/trailing /'s but should include inner /'s.
+# #' @param host the host URL, including the http/https scheme.
+# #' @param port the port, not including the colon
+# #' @param root the API root, with no trailing slashes.
+# get_endpoint_url_direct <- function(
+#   endpoint,
+#   host = get_api_host(),
+#   port = get_api_port(),
+#   root = get_api_root()
+# ) {
+#   if( is.null(port) || port == "" ) {
+#     port_string <- ""
+#   } else {
+#     port_string <- glue::glue(":{port}")
+#   }
+#
+#   if(is.null(root) || root == "") {
+#     root_string <- ""
+#   } else if(root == "/") {
+#     root_string <- "/"
+#   } else {
+#     root_string = glue::glue("/{root}")
+#   }
+#
+#   url <- glue::glue("{host}{port_string}{root_string}/{endpoint}")
+#   return(url)
+# }
+
 #' get_endpoint_url
 #'
 #' function to get the usable URL to an endpoint
 #'
+#' @param api_config an API Config object. Should be validated prior to passing into this function.
 #' @param endpoint the endpoint to hit (string). Should not include leading/trailing /'s but should include inner /'s.
-#' @param host the host URL, including the http/https scheme.
-#' @param port the port, not including the colon
-#' @param root the API root, with no trailing slashes.
 get_endpoint_url <- function(
-  endpoint,
-  host = get_api_host(),
-  port = get_api_port(),
-  root = get_api_root()
+  api_config,
+  endpoint
 ) {
+  host = api_config$host
+  port = api_config$port
+  root = api_config$root
+
   if( is.null(port) || port == "" ) {
     port_string <- ""
   } else {
@@ -140,7 +181,7 @@ check_response <- function(resp) {
 #'
 #' @param endpoint_url the full API URL for the endpoint to receive the GET request
 #' @param ... query parameters to be sent with the API request.
-#' @return the response from the API.
+#' @return the response content from the API.
 api_get <- function(
   endpoint_url,
   ...
@@ -176,6 +217,35 @@ api_get <- function(
   return(extract_json(resp))
 }
 
+api_post <- function(
+  endpoint_url,
+  body,
+  ...
+) {
+  # json_body <- jsonlite::toJSON(body)
+
+  query_params <- lapply(
+    purrr::compact(rlang::list2(...)),
+    function(.x) {
+      if (rlang::is_bare_numeric(.x)) {
+        return(.x)
+      }
+      return(I(.x))
+    }
+  )
+
+  resp <- httr::POST(
+    url = endpoint_url,
+    body = body,
+    encode = "application/json",
+    config = NULL
+  )
+
+  check_response(resp)
+
+  return(extract_json(resp))
+}
+
 #' extract_json
 #' function to pull JSON out of a response object.
 #' @param response the response object, which should have a $content field that is just raw JSON.
@@ -188,3 +258,126 @@ extract_json <- function(response, ..., simplify_df = FALSE) {
 }
 
 # end plumbing # ----
+
+#' create_api_config
+#'
+#' function to create a top level "API config" object, which stores basic, root-level information
+#' about the specific RSQ API to be queried. The API config object can be used to construct endpoints,
+#' as well as to store authorization information (if this becomes applicable in the future)
+#'
+#' @param host the hostname of server hosting the desired RSQ API. Should include the HTTP/HTTPS schema.
+#' @param port the port on which the API his hosted
+#' @param root the root of the API, without leading or trailing slashes.
+#' @return an object of class "rsq_api_config" (set by CONSTANTS$CLASSES$API_CONFIG) that can be passed
+#' into other functions to facilitate the submission of API queries.
+create_api_config <- function(
+  host = get_api_host(),
+  port = get_api_port(),
+  root = get_api_root()
+) {
+  config_obj <- list(
+    # scheme = scheme,
+    host = host,
+    port = port,
+    root = root
+  )
+
+  class(config_obj) <- CONSTANTS$CLASSES$API_CONFIG
+  return(config_obj)
+}
+
+#' check_api_config
+#'
+#' verifies that the given api_config object is a valid api_config object by ensuring that it has
+#' the proper class attached to it.
+#'
+#' @param api_config an api_config object
+#' @return
+#' returns true if the api_config object is valid, otherwise throws an error with rlang::abort
+check_api_config <- function(api_config) {
+  if(!inherits(api_config, CONSTANTS$CLASSES$API_CONFIG)) {
+    rlang::abort(glue::glue("expected api_config object to have class {CONSTANTS$CLASSES$API_CONFIG}. Please construct and/or set using `create_api_config`."))
+  } else {
+    return(TRUE)
+  }
+}
+
+#' check_valid_status
+#'
+#' verifies that all statuses in a vector of statuses can be recognized by RSQ.
+#'
+#' @param statuses a case-sensitive character vector of statuses.
+#' @return TRUE if all statuses in statuses can be recognized by RSQ, otherwise throws an error with rlang::abort
+check_valid_statuses <- function(statuses) {
+  if(is.null(statuses)) {
+    return(TRUE)
+  }
+
+  valid_statuses <- get_valid_statuses()
+  purrr::walk(statuses, function(.status) {
+    if(!.status %in% valid_statuses) {
+      rlang::abort(glue::glue("Invalid status provided: `{.status}` is not a valid RSQ job status. You can get valid statuses with rrsq::get_valid_statuses()"))
+    }
+  })
+  return(TRUE)
+}
+
+#' get_valid_statuses
+#'
+#' helper function to return the current valid RSQ statuses
+#'
+#' @return a named list containing all valid RSQ statuses
+get_valid_statuses <- function() {
+  return(CONSTANTS$JOB_STATUS)
+}
+
+#' get_jobs
+#'
+#' function to query an RSQ API and return a data.frame of all jobs
+#'
+#' @param api_config an api_config object.
+#' @param users an optional parameter. If set, will only return jobs for the indicated users. Can be a string or character vector.
+#' @param status an optional parameter. If set, will only return jobs containing the listed statuses.
+#' @return a data.frame of all current jobs.
+get_jobs <- function(
+  api_config,
+  users = NULL,
+  statuses = NULL
+) {
+  check_api_config(api_config)
+  check_valid_statuses(statuses)
+
+  # if(is.null(users)) {
+  #   users = c()
+  # }
+  # if(is.null(statuses)) {
+  #   statuses = c()
+  # }
+
+  endpoint <- get_endpoint_url(
+    api_config = api_config,
+    endpoint = CONSTANTS$ENDPOINTS$JOBS
+  )
+
+  # A bit of a conundrum.
+  # I want to be let users query multiple statuses at once. Do I make up to four small API calls, but usually only one or two?
+  # or do I always make a big API call and then filter down later?
+  # Answer for now: Since RSQ has always been hosted locally (thus far), we can expect there to be minimal latency
+  # between the client and server. Therefore, I think it is reasonable to make multiple small requests, as the overhead is
+  # likely to be a bit lower in practice.
+  if(!is.null(statuses)) {
+    jobs_df <- purrr::map_dfr(statuses, function(.status) {
+      return(api_get(endpoint, status=.status) %>% jobs_to_df())
+    })
+  } else {
+    jobs_df <- api_get(endpoint) %>% jobs_to_df()
+  }
+
+  # Does RSQ's API provide an option to filter by users API-side?
+  if(!is.null(users)) {
+    jobs_df <- jobs_df %>% dplyr::filter(user %in% users)
+  }
+
+  return(jobs_df)
+}
+
