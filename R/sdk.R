@@ -45,19 +45,36 @@ create_api_config <- function(
   return(config_obj)
 }
 
+#' set_api_config
+#'
+#' Function to set the rrsq.rsq_api_config option to an api_config object.
+#' doing this will allow you to call other functions without having to
+#' pass in the api_config object everytime.
+#'
+#' @param api_config an rsq_api_config object
+#' @details
+#' Note that this function _does_ verify that api_config is a valid rsq_api_config object.
+#' As such, an error will be thrown if api_config is not a valid rsq_api_config object.
+#' @return the newly set value of the rrsq.rsq_api_config option (i.e. api_config argument passed in)
+set_api_config <- function(api_config) {
+  check_api_config(api_config)
+  options(rrsq.rsq_api_config = api_config)
+  return(getOption("rrsq.rsq_api_config"))
+}
+
 #' get_job
 #'
 #' function to query an RSQ API and return the current status/info of single job.
 #' job can be returned as a list object with class `rsq_job`, or as a data.frame.
 #'
-#' @param api_config an api_config object
 #' @param job_id the numeric ID of the RSQ job to return, OR an object of class "rsq_job"
 #' @param return_df boolean. If TRUE, results will be returned as a one-row data.frame.
 #'   Otherwise, results will be returned as a list-object.
+#' @param api_config an api_config object
 get_job <- function(
-  api_config,
   job,
-  return_df = FALSE
+  return_df = FALSE,
+  api_config = getOption("rrsq.rsq_api_config")
 ) {
   check_api_config(api_config)
   if(inherits(job, CONSTANTS$CLASSES$RSQ_JOB)) {
@@ -90,9 +107,9 @@ get_job <- function(
 #' @param status an optional parameter. If set, will only return jobs containing the listed statuses.
 #' @return a data.frame of all current jobs.
 get_jobs <- function(
-  api_config,
   users = NULL,
-  statuses = NULL
+  statuses = NULL,
+  api_config = getOption("rrsq.rsq_api_config")
 ) {
   check_api_config(api_config)
   check_valid_statuses(statuses)
@@ -147,13 +164,13 @@ get_jobs <- function(
 #' @return
 #' an `rsq_job` object.
 submit_job2 <- function(
-  api_config,
   user,
   context,
   rscript_path,
   work_dir = NULL,
   r_path = NULL,
-  renv = NULL
+  renv = NULL,
+  api_config = getOption("rrsq.rsq_api_config")
 ) {
   check_api_config(api_config)
   endpoint_url <- get_endpoint_url(api_config, CONSTANTS$ENDPOINTS$JOB)
@@ -198,7 +215,7 @@ submit_job2 <- function(
 #' @param api_config an rsq_api_config object
 #' @param timeout parameter to determine how long (in seconds) the ping should wait for a response. Defaults to 10 seconds.
 #' @return TRUE if the service is responsive, FALSE otherwise.
-ping <- function(api_config, timeout = 10) {
+ping <- function(timeout = 10, api_config = getOption("rrsq.rsq_api_config")) {
   check_api_config(api_config)
   endpoint_url <- get_endpoint_url(api_config, CONSTANTS$ENDPOINTS$PING)
 
@@ -220,7 +237,7 @@ ping <- function(api_config, timeout = 10) {
 #'
 #' @param api_config an rsq_api_config object
 #' @return a list object containing the version of the RSQ service.
-get_version <- function(api_config) {
+get_version <- function(api_config = getOption("rrsq.rsq_api_config")) {
   check_api_config(api_config)
   endpoint_url <- get_endpoint_url(api_config, CONSTANTS$ENDPOINTS$VERSION)
 
@@ -240,7 +257,7 @@ get_version <- function(api_config) {
 #' @param api_config an rsq_api_config object
 #' @param job the numeric ID of the RSQ job to return, OR an object of class "rsq_job"
 #' @return the response content from the cancel job API call.
-cancel_job <- function(api_config, job) {
+cancel_job <- function(job, api_config = getOption("rrsq.rsq_api_config")) {
   check_api_config(api_config)
   if(inherits(job, CONSTANTS$CLASSES$RSQ_JOB)) {
     job_id = job$id

@@ -5,8 +5,10 @@ Sys.setenv(
   RSQ_API_PORT=""
 )
 
-# Should fail
+# Should work (but be invalid)
 ac <- create_api_config(test_ping=F)
+
+# Should fail
 ac <- create_api_config(test_ping=T)
 
 ## Make sure to reset
@@ -15,23 +17,23 @@ ac <- create_api_config(test_ping=T)
 ```{r}
 ## Run before running tests below
 set_default_env_vars()
+ac <- create_api_config()
+set_api_config(api_config = ac)
 ```
 ```{r}
 # Test ping
-ac <- create_api_config()
-ping(ac)
+ping()
 ```
 
 
 ```{r}
 # test get_jobs
-ac <- create_api_config()
-a <- get_jobs(ac)
-b <- get_jobs(ac, users = "Dreznel")
-c <- get_jobs(ac, users = c("Dreznel", "John Carlo"))
-d <- get_jobs(ac, statuses = "ERROR")
-e <- get_jobs(ac, statuses = c("COMPLETED","ERROR"))
-f <- get_jobs(ac, statuses = c("COMPLETED"))
+a <- get_jobs()
+b <- get_jobs(users = "Dreznel")
+c <- get_jobs(users = c("Dreznel", "John Carlo"))
+d <- get_jobs(statuses = "ERROR")
+e <- get_jobs(statuses = c("COMPLETED","ERROR"))
+f <- get_jobs(statuses = c("COMPLETED"))
 
 a
 b
@@ -43,67 +45,56 @@ f
 
 ```{r}
 # Make sure get_jobs fails when invalid status given
-ac <- create_api_config()
-will_fail <- get_jobs(ac, statuses = "INVALID_STATUS")
+will_fail <- get_jobs(statuses = "INVALID_STATUS")
 ```
 
 ```{r}
 # Get job
 
-ac <- create_api_config()
-j1 <- get_job(
-  ac,
-  1
-)
+j1 <- get_job(1)
 j1
 
-j1again <- get_job(ac, j1, return_df = TRUE)
+j1again <- get_job(j1, return_df = TRUE)
 j1again
 ```
 
 ```{r}
 # SubmitJob2
-ac <- create_api_config()
 submitted_job <- submit_job2(
-  api_config = ac,
   user = "johncarlos",
   context = "test job",
   rscript_path = "/Users/johncarlos/openspace/rrsq/hello.R",
   work_dir = "/Users/johncarlos/openspace/rrsq"
 )
-get_job(ac, submitted_job, return_df = T)
+get_job(submitted_job, return_df = T)
 Sys.sleep(3)
-get_job(ac, submitted_job, return_df = T)
+get_job(submitted_job, return_df = T)
 ```
 
 ```{r}
 # Get Version
-ac <- create_api_config()
 # trace(what = get_version, tracer = browser)
 # untrace(get_version)
-get_version(ac)
+get_version()
 ```
 
 ```{r}
 # Cancel job
 
 # I think the request works, but RSQ doesn't actually cancel the job.
-ac <- create_api_config()
 submitted_job <- submit_job2(
-  api_config = ac,
   user = "johncarlos",
   context = "long job",
   rscript_path = "/Users/johncarlos/openspace/rrsq/long_job.R",
   work_dir = "/Users/johncarlos/openspace/rrsq"
 )
 result <- cancel_job(
-  ac,
   submitted_job
 )
 
 result
 
-result2 <- get_job(ac, submitted_job, return_df = T)
+result2 <- get_job(submitted_job, return_df = T)
 result2
 ```
 
